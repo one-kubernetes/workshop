@@ -1,0 +1,45 @@
+# Vagrantfile to provision a lab with 2 K3S servers:
+# - one for staging
+# - another for prod
+
+# to-do: Fix. cannot kubectl anything
+
+$script = <<-'SCRIPT'
+if [ ! -f /etc/rancher/k3s/k3s.yaml ]
+then
+  curl -sfL https://get.k3s.io | sh -
+fi
+sudo ls -al /etc/rancher/k3s/k3s.yaml 
+sudo chmod o+r /etc/rancher/k3s/k3s.yaml 
+sudo service k3s start
+SCRIPT
+
+servers = [
+  {:hostname => "staging",
+   :host_port => 6445},
+  {:hostname => "prod",
+   :host_port => 6450}
+]
+
+Vagrant.configure("2") do |config|
+  servers.each do |server|
+    config.vm.define server[:hostname] do |node|
+      node.vm.box = "generic/alpine312"
+      node.vm.box_version = "3.2.24"
+      node.vm.hostname = server[:hostname]
+      node.vm.network "forwarded_port", guest: 6443, host: server[:host_port], protocol: "tcp" 
+      node.vm.provider "virtualbox" do |vb|
+        vb.gui          = false
+        vb.linked_clone = true
+        vb.name         = "k3s-#{server[:hostname]}"
+        vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+        vb.memory = 512
+        vb.cpus = 2
+      end
+      node.vm.provision "bootstrap", type: "shell" do |bootshell|
+        # K3S install
+        bootshell.inline = $script
+      # end
+    end
+  end
+end
