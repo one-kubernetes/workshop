@@ -1,6 +1,6 @@
 # K3S install
 
-more detail here: https://rancher.com/docs/k3s/latest/en/quick-start/
+more detail here: https://rancher.com/docs/k3s/late st/en/quick-start/
 
 curl -sfL https://get.k3s.io | sh -
 sudo chmod o+r /etc/rancher/k3s/k3s.yaml
@@ -35,3 +35,21 @@ flux create tenant dev-team --with-namespace=apps --export > ./tenants/base/dev-
 flux create source git dev-team --namespace=apps --url=https://github.com/one-kubernetes/lpiot-dev-team --branch=main --export > ./tenants/base/dev-team/sync2.yaml
 flux create kustomization dev-team --namespace=apps --service-account=dev-team --source=GitRepository/dev-team --path="./" --export >> ./tenants/base/dev-team/sync2.yaml
 
+cat << EOF | tee ./tenants/staging/dev-team-patch.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: dev-team
+  namespace: apps
+spec:
+  path: ./staging
+EOF
+
+cat << EOF | tee ./tenants/staging/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base/dev-team
+patchesStrategicMerge:
+  - dev-team-patch.yaml
+EOF
