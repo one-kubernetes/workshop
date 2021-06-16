@@ -1,3 +1,7 @@
+# todo: add flux install
+# add cp /etc/rancher/k3s/k3s.yaml .kube/config && export KUBECONFIG=.kube/config
+
+
 source "azure-arm" "k8s-lab-image" {
   subscription_id = "92c69a02-47c5-4c5b-a49e-442d56f1ab8a"
   tenant_id = "44d4dd21-a02e-4538-b021-e72217f58698"
