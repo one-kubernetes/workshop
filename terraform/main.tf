@@ -118,7 +118,7 @@ resource "azurerm_network_interface" "k8s_lab_staging" {
 }
 
 resource "azurerm_linux_virtual_machine" "k3s_server_staging" {
-  count               = 0
+  count               = 1
   name                = "k3s-server-staging"
   resource_group_name = azurerm_resource_group.k8s_lab.name
   location            = azurerm_resource_group.k8s_lab.location
