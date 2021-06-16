@@ -3,10 +3,22 @@
 # - another for prod
 
 $script = <<-'SCRIPT'
-if [ ! -f /etc/rancher/k3s/k3s.yaml ]
+if [ ! -f /usr/local/bin/k3s ]
 then
   curl -sfL https://get.k3s.io | sh -
 fi
+
+if [ ! -f /usr/local/bin/flux ]
+then
+  curl -s https://fluxcd.io/install.sh | sudo bash
+fi
+
+sleep 20
+sudo find /etc/rancher -ls
+sudo chmod o+r /etc/rancher/k3s/k3s.yaml
+mkdir -p ~/.kube/
+ln -s /etc/rancher/k3s/k3s.yaml ~/.kube/config
+
 SCRIPT
 
 servers = [
