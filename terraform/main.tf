@@ -12,7 +12,7 @@ provider "azurerm" {
 }
 
 data "azurerm_image" "existing" {
-  name                = "k8s-lab_s3s-server"
+  name                = "k8s-lab_k3s-server"
   resource_group_name = azurerm_resource_group.k8s_lab.name
 }
  
