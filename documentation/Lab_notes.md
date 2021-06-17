@@ -163,3 +163,29 @@ F4Gj5pxc8Ijb~LvUFNLxpUuue8BLv..cg0
 ludovic@Azure:~$
 
 
+
+MUST DO :
+Ouvrir dépo workshop pour toutes les instructions
+Pull image Docker
+Docker run
+Logging sur Azure
+Fork DevTeam1
+Création ACR / AKS
+Description du pipeline
+Création du pipeline dans Azure DevOps
+Configuration du pipeline
+Run Azure pipeline
+On a un chart Helm
+Aller voir que les images Docker et le Chart Helm sont bien présent
+(Création du namespace)
+(Déploiement du chart Helm a la main)
+Installation Flux sur Kubernetes
+Pour staging :
+Configuration Flux pour pointer vers le Helm (HelmRepo / HelmRelease)
+Upgrade du chart pour déclenchement upgrade Chart Helm via Flux
+Pour production :
+Configuration Flux pour pointer vers le Helm (HelmRepo / HelmRelease)
+Upgrade du chart pour déclenchement upgrade Chart Helm via Flux
+
+NICE TO HAVE :
+Le reste
