@@ -35,6 +35,8 @@ Then, we have a scenario on 3 tracks:
 
 Here is a sequence diagram of what we will do:
 
+!(./documentation/mermaid-diagram-20210618084756.png)
+
 ``` mermaid
 sequenceDiagram
     participant d1 as Dev 1
