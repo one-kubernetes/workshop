@@ -1,7 +1,20 @@
-# workshop
-The main project for this workshop.
+# GitOps, a slightly realistic situation on Kubernetes with FluxCD
 
-# Synopsis
+<!-- TOC -->
+- [Abstract](#abstract)
+- [Synopsis](#synopsis)
+<!-- /TOC -->
+
+## Abstract
+
+You're tired of talks that deploy _hello-worlds_ to demonstrate the relevance of the _younameit_ tool.  
+It's a good thing: what we're interested in is trying a slightly realistic _DevSecOps_ situation!  
+We will therefore build a _step-by-step_ enterprise scenario with a _dev_ team, which deploys/updates/rolls back _WebApps_ on `Kubernetes` via `Helm` _charts_.
+A second _dev_ team will use `Kustomize`, for the same purpose.  
+And on the _Ops_ side, we will also be concerned with the platform's security issues: segregation of team rights, _WebApps_ network flows, transparent patch management on the technical stack, metrology, control of activities on the _cluster_.  
+We will see how these teams collaborate with each other on a daily basis in a _GitOps_ workflow that relies on `Kubernetes`, `FluxCD`, `Azure DevOps`, and many other things…
+
+## Synopsis
 
 This is a hands-on workshop, performed on `Ms Azure` and documented into this very same `Github` repository.  
 Every command is performed from a Docker container that is our work environement so nothing is required but:
