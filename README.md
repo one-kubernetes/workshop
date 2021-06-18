@@ -35,7 +35,7 @@ Then, we have a scenario on 3 tracks:
 
 Here is a sequence diagram of what we will do:
 
-![sequence diagram](documentation\mermaid-diagram-20210618090905.svg)
+![sequence diagram](documentation/mermaid-diagram-20210618090905.svg)
 
 ```mermaid
 sequenceDiagram
