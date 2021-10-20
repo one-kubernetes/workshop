@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev1-ns
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev1
+  namespace: dev1-ns
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev1-ns
+  name: dev1-full-access
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev1-view
+  namespace: dev1-ns
+subjects:
+- kind: ServiceAccount
+  name: dev1
+  namespace: dev1-ns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dev1-full-access
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev2-ns
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev2
+  namespace: dev2-ns
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev2-ns
+  name: dev2-full-access
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev2-view
+  namespace: dev2-ns
+subjects:
+- kind: ServiceAccount
+  name: dev2
+  namespace: dev2-ns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dev2-full-access
+---
