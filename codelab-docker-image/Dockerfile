@@ -5,7 +5,7 @@ FROM alpine:latest as tf
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
 # Terraform vars
-ARG TERRAFORM_VERSION=1.0.0
+ARG TERRAFORM_VERSION=1.0.9
 
 # Terraform install
 WORKDIR /usr/bin
@@ -24,7 +24,7 @@ FROM alpine:latest as pac
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
 # Packer vars
-ARG PACKER_VERSION=1.7.2
+ARG PACKER_VERSION=1.7.6
 
 # Packer install
 WORKDIR /usr/bin
@@ -65,6 +65,7 @@ RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/
 # more detail here: https://fluxcd.io/docs/get-started/
 
 RUN curl -s https://fluxcd.io/install.sh | bash
+
 
 # Kubectl install
 

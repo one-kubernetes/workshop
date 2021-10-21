@@ -39,8 +39,8 @@ Here is a sequence diagram of what we will do:
 
 ```mermaid
 sequenceDiagram
-    participant d1 as Dev 1
-    participant d2 as Dev 2
+    participant d1 as Dev1
+    participant d2 as Dev2
     participant git as Github
     participant azd as Azure DevOps
     participant acr as ACR (container registry)
@@ -124,101 +124,47 @@ Here are the steps to perform…
 
 Now you have all the instructions at hand!
 
-## 👉 Enter your work environment
 
-We built a [`docker` image](https://hub.docker.com/layers/thegaragebandofit/infra-as-code-tools/azure-full/images/sha256-540102deff40659a44ef1c1a8372b1c587b1140f70222fdf05c52c101f9216e8?context=repo) that contains:
+## ✋ Pre-requisites
 
-- git, vim, jq, yq, tmux and other common tools
-- azure cli
-- kubectl
-- helm
-- kustomize
-- flux
+1. To play the codelab, you may use an interactive workspace based on a Docker image. [See instructions, here](./codelab-docker-image/README.md).
+1. To create a `Kubernetes` _cluster_ on **Azure**, [see instructions here](documentation/kubernetes-cluster-on-azure.md).
 
-So you have everything you need 🧳 in this image 🐋!
+# 🚪 Namespace isolation
 
-```bash
-cd ${myLocalGitRepositoryClone}
-docker container run -it --volume $(pwd):/mycode --name gitops-lab thegaragebandofit/infra-as-code-tools:azure-full
-```
+💡 First of all, you want to isolate both _dev_ teams in their own _namespace_.
 
-Now you're in the container, with all the tools that are needed.
+🧙‍♂️ As the _Ops_ team.  
+You want to create 2 _namespaces_ for both your 🙋‍♀️_dev1_ team and your 🙋‍♂️_dev2_ team.  
+* 🙋‍♀️_dev1_ team should be able to use its _namespace_ but not the one of 🙋‍♂️_dev2_ team.
+* 🙋‍♂️_dev2_ team should be able to use its _namespace_ but not the one of 🙋‍♀️_dev1_ team.
+* 🧙‍♂️_ops_ team should be able to use both, since it is the admin of the `kubernetes` _cluster_.
 
-💡 If you wan't to know this `docker` image is built and what tools it contains…
+To do so, you have to run the following commands…
 
 ```bash
-docker image history --no-trunc thegaragebandofit/infra-as-code-tools:azure-full
-```
+# Create resources (namespaces, service accounts, roles and role bindings)
+kubectl create -f access.yml
 
-💡 To build it…
+# how to get secrets
+kubectl describe sa dev1 -n dev1-ns
+kubectl describe sa dev2 -n dev2-ns
 
-```bash
-cd ${myLocalGitRepositoryClone}/docker
-docker image build --tag mylab:1.0 .
-```
+# how to get service account token
+kubectl get secret dev1-token-5bx7g --namespace=dev1-ns -o "jsonpath={.data.token}" | base64 --decode
+kubectl get secret dev2-token-jhvnf --namespace=dev2-ns -o "jsonpath={.data.token}" | base64 --decode
 
-## 👉 Connect onto Azure
+# how to get service account client certificate key
+kubectl get secret dev1-token-5bx7g --namespace=dev1-ns -o "jsonpath={.data['ca\.crt']}"
+kubectl get secret dev2-token-jhvnf --namespace=dev2-ns -o "jsonpath={.data['ca\.crt']}"
 
-First of all, you have to connect onto your `Azure` account…
+# how to create a pod
+export KUBECONFIG=./mykube-config.yml
+kubectl config current-context
+kubectl run nginx --image=nginx --restart=Never --namespace=dev1-ns
+kubectl run nginx --image=nginx --restart=Never --namespace=dev2-ns
 
-```bash
-az login
-```
-
-Follow the instructions.
-
-## 👉 Provision a Kubernetes cluster
-
-```bash
-export location='eastus'
-export rg='k8s-lab'
-export aks='k8s-staging'
-export acr='CloudOuestK8sLabRegistry'
-
-# Create a resource group $rg on a specific location $location (for example eastus) which will contain the Azure services we need 
-az group create -l $location -n $rg
-
-# Setup of the AKS cluster
-latestK8sVersion=$(az aks get-versions -l $location --query 'orchestrators[-1].orchestratorVersion' -o tsv)
-echo $latestK8sVersion
-az aks create -l $location --name $aks -g $rg --generate-ssh-keys -k $latestK8sVersion --node-count 1
-
-# Once created (the creation could take ~10 min), get the kube configuration to interact with your AKS cluster
-az aks get-credentials --name $aks -g $rg
-kubectl get nodes
-```
-
-## 👉 Provision a Container Registry / Chart Repository
-
-We'll use an `Azure` _container registry_ that is also an `Helm` _charts_ repository.  
-
-`Azure DevOps` _pipeline_ will have to use the credentials in order to interact with it.
-But our `Kubernetes` _cluster_ is able to interact thanks to a dedicated service principal (`IAM`).
-
-```bash
-# Create an ACR registry $acr
-az acr create -n $acr -g $rg -l $location --sku Basic
-
-# 1. Assign acrpull role on our ACR to the AKS-generated service principal, the AKS cluster will then be able to pull images from our ACR
-ACR_ID=$(az acr show -n $acr -g $rg --query id -o tsv)
-echo $ACR_ID
-az aks update -g $rg -n $aks --attach-acr $ACR_ID
-
-# 2. Create a specific Service Principal for our Azure DevOps pipelines to be able to push and pull images and charts of our ACR
-registryPassword=$(az ad sp create-for-rbac -n $acr-push --scopes $ACR_ID --role acrpush --query password -o tsv)
-
-# Important note: you will need this registryPassword value later in this blog article in the Create a Build pipeline and Create a Release pipeline sections
-echo $registryPassword
-
-# 3. Create a specific Service Principal for our Azure DevOps pipelines to be able to deploy our application in our AKS
-AKS_ID=$(az aks show -n $aks -g $rg --query id -o tsv)
-aksSpPassword=$(az ad sp create-for-rbac -n $aks-deploy --scopes $AKS_ID --role "Azure Kubernetes Service Cluster User Role" --query password -o tsv)
-
-# Important note: you will need this aksSpPassword value later in this blog article in the Create a Release pipeline section
-echo $aksSpPassword
-
-# 4. Retrieve registryLogin
-az ad sp show --id http://$acr-push --query appId -o tsv
+kubectl auth can-i --namespace=dev3 --list
 ```
 
 # Dev Team
@@ -252,47 +198,14 @@ You may upgrade your application and see that the CI is working fine: for every 
 
 # Ops Team
 
-Now you are the _Ops_ team.  
+🧙‍♂️ Now you are the _Ops_ team.  
 What you have to do is install and configure flux so that **every time a new chart is published**, it is deployed into the right namespace on the right `kubernetes`_cluster_.
 
-## Flux install
 
-First of all, you can check that your `Flux` _CLI_ is able to communicate with your `Kubernetes` _cluster_.
+# Flux
 
-```bash
-flux check --pre
-```
-
-Now you will perform the initial configuration of `Flux`.  
-To do so, you must generate a `Github` _token_ so that `Flux` is able to interact with your repository.
-
-```bash
-export GITHUB_TOKEN="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"
-export GITHUB_USER="one-kubernetes"
-export GITHUB_REPO="workshop"
-
-flux bootstrap github --context=k8s-staging --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --personal --branch=main --path=clusters/staging
-```
-
-By doing so, `Flux`:
-- create a Github source that will be its configuration reference.
-- deploy all the kubernetes resources that it needs to run (namespace, operator, CRDs…)
-
-You can check what sources `Flux` monitor.
-
-```bash
-flux get all
-```
-
-## Flux configuration
-
-Now you have to upgrade `Flux` configuration so that it watches 2 extra sources: the charts your `Azure DevOps` _pipeline_ publishes for your _dev_ team.
-
-```bash
-flux create helmrelease front --chart front --source HelmRepository/app --namespace default
-flux create helmrelease back --chart back --source HelmRepository/app --namespace default
-flux create source helm app --url http://20.93.169.137:8080 --namespace default
-```
+To install and configure `Flux` in order to manage deployment onto your `Kubernetes` _cluster_ as a **single _tenant_**, see [here](documentation/flux-single-tenant.md).  
+To do so in order for your `Flux` to be able to manage **multiple _tenants_** onto your `Kubernetes` _cluster_, see [here](documentation/flux-multi-tenant.md).
 
 ## :warning: Flux v2 and Azure ACR
 
