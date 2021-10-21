@@ -1,4 +1,4 @@
-# Flux - singtle tenant
+# Flux - single tenant
 
 ## First install
 
