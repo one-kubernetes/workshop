@@ -1,64 +1,103 @@
-## Bootstrap Flux
+# Flux - multi tenant
+
+## First install
+
+First of all, you can check that your `Flux` _CLI_ is able to communicate with your `Kubernetes` _cluster_.
+
+```bash
 flux check --pre
+```
 
+Now you will perform the initial configuration of `Flux`.  
+To do so, you must generate a `Github` _token_ so that `Flux` is able to interact with your repository.
+
+As you can see, we indicate two teams (`dev1` and `dev2`) that will be allowed to access the **Github** repository.  
+These teams must already exist in your **Github** organization.
+
+```bash
 export GITHUB_TOKEN="<insert your Github personal token here>"
+export GITHUB_USER="one-kubernetes"
+export GITHUB_REPO="fleet-infra"
 
-flux bootstrap github --owner=one-kubernetes --repository=fleet-infra --team=dev-team1 --team=dev-team2 --path=clusters/devfestnantes
+flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=dev1 --team=dev2 --path=clusters/devfestnantes
+```
 
 ## Create tenants YAML
-flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=5m --export >> clusters/devfestnantes/tenants.yaml
 
-## Onboard dev-team1 kustomize
-mkdir -p ./tenants/base/dev-team1
+Now we create the base of the directories that will handle the Flux configuration so that it can manage multiple tenants.
 
-flux create tenant dev-team1 --with-namespace=apps-dev-team1 --export > ./tenants/base/dev-team1/rbac.yaml
+```bash
+cd ./fleet-infra
+flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=3m --export >> clusters/devfestnantes/tenants.yaml
+```
 
-flux create source git dev-team1 --namespace=apps-dev-team1 --url=https://github.com/laurentgrangeau/docker-kubernetes-hello-world/ --branch=master --export > ./tenants/base/dev-team1/sync.yaml
+## Onboard dev1 kustomize
 
-flux create kustomization dev-team1 --namespace=apps-dev-team1 --service-account=dev-team1 --source=GitRepository/dev-team1 --path="./" --export >> ./tenants/base/dev-team1/sync.yaml
+```bash
+mkdir -p ./tenants/base/dev1
+
+flux create tenant dev1 --with-namespace=dev1-ns --export > ./tenants/base/dev1/rbac.yaml
+
+flux create source git dev1-aspicot --namespace=dev1-ns --url=https://github.com/one-kubernetes/dev1-aspicot-app/ --branch=main --export > ./tenants/base/dev1/sync.yaml
+
+flux create kustomization dev1 --namespace=dev1-ns --service-account=dev1 --source=GitRepository/dev1-aspicot --path="./" --export >> ./tenants/base/dev1/sync.yaml
+
+cd ./tenants/base/dev1/ && kustomize create --autodetect
+
 
 In the repo laurentgrangeau, create the `kustomization.yaml` with `kustomize create --autodetect`
 
-cd ./tenants/base/dev-team1/ && kustomize create --autodetect
 
-cat << EOF | tee ./tenants/staging/dev-team1/dev-team1-patch.yaml
+cat << EOF | tee ./tenants/staging/dev1/dev1-patch.yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
-  name: dev-team1
-  namespace: apps-dev-team1
+  name: dev1
+  namespace: dev1-ns
 spec:
   path: ./
 EOF
 
-cat << EOF | tee ./tenants/staging/dev-team1/kustomization.yaml
+cat << EOF | tee ./tenants/staging/dev1/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../base/dev-team1
+  - ../../base/dev1
 patches:
-  - path: dev-team1-patch.yaml
+  - path: dev1-patch.yaml
     target:
       kind: Kustomization
 EOF
+```
 
-## Onboard dev-team2 helm
-mkdir -p ./tenants/base/dev-team2
+# Onboard dev2 team
 
-flux create tenant dev-team2 --with-namespace=apps-dev-team2 --export > ./tenants/base/dev-team2/rbac.yaml
+## create tenant
 
-flux create source helm charts --url=https://one-kubernetes.github.io/helm-charts/ --interval=10m --export >> ./tenants/base/dev-team2/sync.yaml
+```bash
+mkdir -p ./tenants/base/dev2
+flux create tenant dev2 --with-namespace=dev2-ns --export > ./tenants/base/dev2/rbac.yaml
+```
 
-flux create helmrelease dev-team2 --namespace=apps-dev-team2 --service-account=dev-team2 --source=HelmRepository/charts.flux-system --chart=hellodevfestnantes --export >> ./tenants/base/dev-team2/sync.yaml
+## create flux resources to watch helm charts releases
 
-cd ./tenants/base/dev-team2/ && kustomize create --autodetect
+```bash
+flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --export > ./tenants/base/dev2/sync.yaml
 
-cat << EOF | tee ./tenants/staging/dev-team2/dev-team2-patch.yaml
+flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.flux-system --chart=dev2-carapuce-helm --export >> ./tenants/base/dev2/sync.yaml
+```
+
+## create the patch directory
+
+```bash
+cd ./tenants/staging/dev2/ && kustomize create --autodetect
+
+cat << EOF | tee ./tenants/staging/dev2/dev2-patch.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: podinfo
-  namespace: podinfo
+  name: dev2-carapuce
+  namespace: dev2-ns
 spec:
   chart:
     spec:
@@ -74,15 +113,14 @@ spec:
               pathType: ImplementationSpecific
 EOF
 
-cat << EOF | tee ./tenants/staging/dev-team2/kustomization.yaml
+cat << EOF | tee ./tenants/staging/dev2/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../../base/dev-team2
+  - ../../base/dev2
 patches:
-  - path: dev-team2-patch.yaml
+  - path: dev2-patch.yaml
     target:
       kind: Kustomization
 EOF
-
-## Add Loki stack
+```
