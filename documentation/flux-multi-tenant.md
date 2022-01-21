@@ -32,6 +32,7 @@ cd ./tenants/base/dev1/ && kustomize create --autodetect
 ```
 In the repo `laurentgrangeau`, create the `kustomization.yaml` with `kustomize create --autodetect`
 ```bash
+mkdir -p ./tenants/staging/dev1
 cat << EOF | tee ./tenants/staging/dev1/dev1-patch.yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
@@ -66,6 +67,8 @@ flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2
 ```
 ## Create the patch directory
 ```bash
+mkdir -p ./tenants/staging/dev2
+
 cd ./tenants/staging/dev2/ && kustomize create --autodetect
 
 cat << EOF | tee ./tenants/staging/dev2/dev2-patch.yaml
