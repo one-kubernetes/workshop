@@ -16,13 +16,96 @@ export GITHUB_REPO="fleet-infra"
 
 flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=dev1 --team=dev2 --path=clusters/tourainetech
 ```
+## Clone your repository
+By default, `flux boostrap` don't create the folder inside your shell, so you must clone the newly created repository from Github
+```bash
+git clone https://github.com/<your-organization>/fleet-infra
+```
+## Apply namespace isolation
+To enforce isolation of namespaces, we will create two different namespaces `dev1-ns` and `dev2-ns`, along with two different service accounts, each account having access to its own namespace.
+```bash
+mkdir -p clusters/tourainetech/namespace-isolation
+cat << EOF | tee ./clusters/tourainetech/namespace-isolation.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev1-ns
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev1
+  namespace: dev1-ns
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev1-ns
+  name: dev1-full-access
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev1-view
+  namespace: dev1-ns
+subjects:
+- kind: ServiceAccount
+  name: dev1
+  namespace: dev1-ns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dev1-full-access
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev2-ns
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev2
+  namespace: dev2-ns
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev2-ns
+  name: dev2-full-access
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev2-view
+  namespace: dev2-ns
+subjects:
+- kind: ServiceAccount
+  name: dev2
+  namespace: dev2-ns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dev2-full-access
+```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Create tenants YAML
 Now we create the base of the directories that will handle the Flux configuration so that it can manage multiple tenants.
 ```bash
 cd ./fleet-infra
 flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=3m --export >> clusters/tourainetech/tenants.yaml
 ```
-## Onboard dev1 kustomize
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
+## Onboard dev1 Kustomize
+Now, we can create the first tenant, which will be `dev1`
 ```bash
 mkdir -p ./tenants/base/dev1
 flux create tenant dev1 --with-namespace=dev1-ns --export > ./tenants/base/dev1/rbac.yaml
@@ -30,8 +113,13 @@ flux create source git dev1-aspicot --namespace=dev1-ns --url=https://github.com
 flux create kustomization dev1 --namespace=dev1-ns --service-account=dev1 --source=GitRepository/dev1-aspicot --path="./" --export >> ./tenants/base/dev1/sync.yaml
 cd ./tenants/base/dev1/ && kustomize create --autodetect
 ```
-In the repo `laurentgrangeau`, create the `kustomization.yaml` with `kustomize create --autodetect`
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
+
+In your development repository, create the `kustomization.yaml` with `kustomize create --autodetect`.
+For this workshop, the `kustomization.yaml` is already created for you.
+
 ```bash
+mkdir -p tenants/staging/dev1/
 cat << EOF | tee ./tenants/staging/dev1/dev1-patch.yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
@@ -53,6 +141,7 @@ patches:
       kind: Kustomization
 EOF
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 # Onboard dev2 team
 ## Create tenant
 ```bash
@@ -63,6 +152,7 @@ flux create tenant dev2 --with-namespace=dev2-ns --export > ./tenants/base/dev2/
 ```bash
 flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --export > ./tenants/base/dev2/sync.yaml
 flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.flux-system --chart=dev2-carapuce-helm --export >> ./tenants/base/dev2/sync.yaml
+cd ./tenants/base/dev2/ && kustomize create --autodetect
 ```
 ## Create the patch directory
 ```bash
@@ -77,7 +167,7 @@ metadata:
 spec:
   chart:
     spec:
-      version: ">=1.0.0-alpha"
+      version: "0.1.0"
   test:
     enable: false
   values:
