@@ -9,6 +9,10 @@
 - [👉 Provision a Kubernetes cluster and a Container/Chart Registry](#-provision-a-kubernetes-cluster-and-a-containerchart-registry)
 <!-- /TOC -->
 
+Click the button below to start a new development environment:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/one-kubernetes/workshop)
+
 ## 👓 Abstract
 
 You're tired of talks that deploy _hello-worlds_ to demonstrate the relevance of the _younameit_ tool.  
