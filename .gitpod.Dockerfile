@@ -1,7 +1,17 @@
 # -----------------------------------------------------------------------------
+# Base install
+# -----------------------------------------------------------------------------
+FROM ubuntu:20.04 as base
+LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
+
+RUN apt-get update -y
+RUN apt-get install -y wget unzip
+
+
+# -----------------------------------------------------------------------------
 # Terraform
 # -----------------------------------------------------------------------------
-FROM ubuntu:20.04 as tf
+FROM base as tf
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
 # Terraform vars
@@ -20,7 +30,7 @@ RUN touch ~/.bashrc && \
 # -----------------------------------------------------------------------------
 # Packer
 # -----------------------------------------------------------------------------
-FROM ubuntu:20.04 as pac
+FROM base as pac
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
 # Packer vars
@@ -42,13 +52,14 @@ RUN touch ~/.bashrc && \
 FROM gitpod/workspace-full
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
+WORKDIR /home/gitpod
 COPY --from=tf /usr/bin/terraform /usr/bin/terraform
-COPY --from=tf /root/.bashrc /root/.bashrc_tf
+COPY --from=tf /root/.bashrc ./.bashrc_tf
 
 COPY --from=pac /usr/bin/packer /usr/bin/packer
-COPY --from=pac /root/.bashrc /root/.bashrc_pac
+COPY --from=pac /root/.bashrc ./.bashrc_pac
 
-RUN cat /root/.bashrc_tf /root/.bashrc_pac >> /root/.bashrc
+RUN cat ./.bashrc_tf ./.bashrc_pac >> ./.bashrc
 
 # Helm install
 # more details here: https://helm.sh/docs/intro/install/
@@ -59,7 +70,7 @@ RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 |
 # more detail here: https://kubectl.docs.kubernetes.io/installation/kustomize/
 
 RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash && \
-    mv kustomize /usr/local/bin
+    sudo mv kustomize /usr/local/bin
 
 # Flux install
 # more detail here: https://fluxcd.io/docs/get-started/
@@ -71,8 +82,8 @@ RUN curl -s https://fluxcd.io/install.sh | bash
 
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl && \
-    mv ./kubectl /usr/local/bin/kubectl
+    sudo mv ./kubectl /usr/local/bin/kubectl
 
 # common tools install
-
-RUN apt-get install jq tmux vim yq
+RUN sudo apt-get update -y
+RUN sudo apt-get install -y jq tmux vim #yq
