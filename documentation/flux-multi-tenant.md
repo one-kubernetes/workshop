@@ -119,7 +119,7 @@ In your development repository, create the `kustomization.yaml` with `kustomize 
 For this workshop, the `kustomization.yaml` is already created for you.
 
 ```bash
-mkdir -p tenants/staging/dev1/
+mkdir -p ./tenants/staging/dev1
 cat << EOF | tee ./tenants/staging/dev1/dev1-patch.yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
@@ -156,6 +156,8 @@ cd ./tenants/base/dev2/ && kustomize create --autodetect
 ```
 ## Create the patch directory
 ```bash
+mkdir -p ./tenants/staging/dev2
+
 cd ./tenants/staging/dev2/ && kustomize create --autodetect
 
 cat << EOF | tee ./tenants/staging/dev2/dev2-patch.yaml

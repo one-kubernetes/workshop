@@ -1,3 +1,6 @@
+image:
+  thegaragebandofit/gitpod-workspace_one-kubernetes:gcloud-0.0.3
+#  file: .gitpod.Dockerfile
 tasks:
   - init: |
       echo 'TODO: build project'

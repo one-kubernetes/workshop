@@ -1,7 +1,17 @@
 # -----------------------------------------------------------------------------
+# Base install
+# -----------------------------------------------------------------------------
+FROM ubuntu:20.04 as base
+LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
+
+RUN apt-get update -y
+RUN apt-get install -y wget unzip
+
+
+# -----------------------------------------------------------------------------
 # Terraform
 # -----------------------------------------------------------------------------
-FROM ubuntu:20.04 as tf
+FROM base as tf
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
 # Terraform vars
@@ -20,7 +30,7 @@ RUN touch ~/.bashrc && \
 # -----------------------------------------------------------------------------
 # Packer
 # -----------------------------------------------------------------------------
-FROM ubuntu:20.04 as pac
+FROM base as pac
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
 # Packer vars
@@ -37,42 +47,67 @@ RUN touch ~/.bashrc && \
     packer -autocomplete-install
 
 # -----------------------------------------------------------------------------
+# yq CLI tool
+# more detail here: https://lindevs.com/install-yq-on-ubuntu/
+# -----------------------------------------------------------------------------
+FROM base as yq
+LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
+
+RUN wget -qO /usr/bin/yq  https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
+    chmod a+x /usr/bin/yq
+
+# -----------------------------------------------------------------------------
 # Final Image
 # -----------------------------------------------------------------------------
 FROM gitpod/workspace-full
+# as gitpod_workspace_gcloud
 LABEL maintainer="Ludovic Piot <ludovic.piot@thegaragebandofit.com>"
 
+WORKDIR /home/gitpod
 COPY --from=tf /usr/bin/terraform /usr/bin/terraform
-COPY --from=tf /root/.bashrc /root/.bashrc_tf
+COPY --from=tf /root/.bashrc ./.bashrc_tf
 
 COPY --from=pac /usr/bin/packer /usr/bin/packer
-COPY --from=pac /root/.bashrc /root/.bashrc_pac
+COPY --from=pac /root/.bashrc ./.bashrc_pac
 
-RUN cat /root/.bashrc_tf /root/.bashrc_pac >> /root/.bashrc
+RUN cat ./.bashrc_tf ./.bashrc_pac >> ./.bashrc
 
-# Helm install
+# ----- GCloud SDK install
+RUN sudo apt-get update && \
+    # Add pre-requisites
+    sudo apt-get install -y apt-transport-https ca-certificates gnupg
+    # Add distribution URI for GCloud SDK as a package source
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    # Add Google Cloud public key
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+    sudo apt-get update && \
+    sudo apt-get install -y google-cloud-sdk && \
+    sudo apt-get install -y kubectl && \
+    sudo rm -Rf ./.sdkman
+
+# ----- Helm install
 # more details here: https://helm.sh/docs/intro/install/
 
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-# Kustomize install
+# ----- Kustomize install
 # more detail here: https://kubectl.docs.kubernetes.io/installation/kustomize/
 
 RUN curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash && \
-    mv kustomize /usr/local/bin
+    sudo mv kustomize /usr/local/bin
 
-# Flux install
+# ----- Flux install
 # more detail here: https://fluxcd.io/docs/get-started/
 
 RUN curl -s https://fluxcd.io/install.sh | bash
 
-
-# Kubectl install
+# ----- Kubectl install
 
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl && \
-    mv ./kubectl /usr/local/bin/kubectl
+    sudo mv ./kubectl /usr/local/bin/kubectl
 
-# common tools install
-
-RUN apt-get install jq tmux vim yq
+# ----- common tools install
+RUN sudo apt-get update -y
+RUN sudo apt-get install -y jq tmux vim
+COPY --from=yq /usr/bin/yq /usr/bin/yq
