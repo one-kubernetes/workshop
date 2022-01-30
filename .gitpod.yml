@@ -1,5 +1,5 @@
 image:
-  thegaragebandofit/gitpod-workspace_one-kubernetes:gcp-0.0.2
+  thegaragebandofit/gitpod-workspace_one-kubernetes:gcloud-0.0.3
 #  file: .gitpod.Dockerfile
 tasks:
   - init: |
