@@ -2,11 +2,10 @@
 
 <!-- TOC -->
 - [👓 Abstract](#-abstract)
+- [🪃 Feedback](#-feedback)
 - [👓 Synopsis](#-synopsis)
-- [👉 Let-su go!](#-let-su-go)
-- [👉 Enter your work environment](#-enter-your-work-environment)
-- [👉 Connect onto Azure](#-connect-onto-azure)
-- [👉 Provision a Kubernetes cluster and a Container/Chart Registry](#-provision-a-kubernetes-cluster-and-a-containerchart-registry)
+- [✋ Pre-requisites](#-pre-requisites)
+- [:warning: Flux v2 and Azure ACR](#warning-flux-v2-and-azure-acr)
 <!-- /TOC -->
 
 Click the button below to start a new development environment:
@@ -21,6 +20,10 @@ We will therefore build a _step-by-step_ enterprise scenario with a _dev_ team, 
 A second _dev_ team will use `Kustomize`, for the same purpose.  
 And on the _Ops_ side, we will also be concerned with the platform's security issues: segregation of team rights, _WebApps_ network flows, transparent patch management on the technical stack, metrology, control of activities on the _cluster_.  
 We will see how these teams collaborate with each other on a daily basis in a _GitOps_ workflow that relies on `Kubernetes`, `FluxCD`, `Azure DevOps`, and many other things…
+
+## 🪃 You can send your feedback here!
+
+![ROTI Express for SnowCamp2022](documentation/images/SnowCamp2022_ROTI Express_QR code.png "ROTI Express for SnowCamp 2022")
 
 ## 👓 Synopsis
 
