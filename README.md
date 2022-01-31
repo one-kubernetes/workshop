@@ -2,10 +2,10 @@
 
 <!-- TOC -->
 - [👓 Abstract](#-abstract)
-- [🪃 Feedback](#-feedback)
 - [👓 Synopsis](#-synopsis)
 - [✋ Pre-requisites](#-pre-requisites)
 - [:warning: Flux v2 and Azure ACR](#warning-flux-v2-and-azure-acr)
+- [🪃 You can send your feedback here!](#-you-can-send-your-feedback-here)
 <!-- /TOC -->
 
 Click the button below to start a new development environment:
@@ -20,10 +20,6 @@ We will therefore build a _step-by-step_ enterprise scenario with a _dev_ team, 
 A second _dev_ team will use `Kustomize`, for the same purpose.  
 And on the _Ops_ side, we will also be concerned with the platform's security issues: segregation of team rights, _WebApps_ network flows, transparent patch management on the technical stack, metrology, control of activities on the _cluster_.  
 We will see how these teams collaborate with each other on a daily basis in a _GitOps_ workflow that relies on `Kubernetes`, `FluxCD`, `Azure DevOps`, and many other things…
-
-## 🪃 You can send your feedback here!
-
-![ROTI Express for SnowCamp2022](documentation/images/SnowCamp2022_ROTI Express_QR code.png "ROTI Express for SnowCamp 2022")
 
 ## 👓 Synopsis
 
@@ -235,3 +231,8 @@ This workshop is inspired by the following Internet resources:
 - Azure DevOps pipeline: https://cloudblogs.microsoft.com/opensource/2018/11/27/tutorial-azure-devops-setup-cicd-pipeline-kubernetes-docker-helm/
 - Flux v2 simple demo: https://github.com/fluxcd/flux2-kustomize-helm-example
 - Flux v2 multi-tenancy: https://github.com/fluxcd/flux2-multi-tenancy
+
+
+## 🪃 You can send your feedback here!
+
+[![roti.express SnowCamp 2022](documentation/images/SnowCamp2022_ROTIExpress_QRcode.png "roti.express SnowCamp 2022")](https://roti.express/r/sc22-031)
