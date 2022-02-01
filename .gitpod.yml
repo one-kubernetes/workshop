@@ -1,16 +1,35 @@
 image:
+  # This image is built upon the following Dockerfile: .gitpod.Dockerfile
   thegaragebandofit/gitpod-workspace_one-kubernetes:gcloud-0.0.3
-#  file: .gitpod.Dockerfile
+# You can dynamically build the image when you create a new GitPod workspace with the following lines
+#   gitpod/workspace-full
+#   file: .gitpod.Dockerfile
 tasks:
-  - init: |
-      echo 'TODO: build project'
+  - name: prepare k3s
+    command: |
+      .gitpod/prepare-k3s.sh
+  - name: kernel dev environment
+    init: |
+      sudo apt update -y
+      sudo apt install qemu qemu-system-x86 linux-image-$(uname -r) libguestfs-tools sshpass netcat -y
+      sudo curl -o /usr/bin/kubectl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      sudo chmod +x /usr/bin/kubectl
+      .gitpod/prepare-rootfs.sh
+    command: |
+      .gitpod/qemu.sh
+  - name: populate the code base
+    init: |
+      echo 'Populate the code base'
       git clone https://github.com/one-kubernetes/dev1-aspicot-app.git
       git clone https://github.com/one-kubernetes/dev2-carapuce-app.git
       git clone https://github.com/one-kubernetes/dev2-helm-charts.git
+      kubectl completion bash > /workspace/kubectl_completion_for_bash.sh
+      echo "source /workspace/kubectl_completion_for_bash.sh" >> ~/.bashrc   
     command: |
       echo 'TODO: start app'
 vscode:
   extensions:
     - yzhang.markdown-all-in-one
+    - Gruntfuggly.todo-tree
 workspaceLocation:
   "."
