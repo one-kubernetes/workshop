@@ -1,11 +1,21 @@
 # GitOps, a slightly realistic situation on Kubernetes with FluxCD
 
 <!-- TOC -->
-- [👓 Abstract](#-abstract)
-- [👓 Synopsis](#-synopsis)
-- [✋ Pre-requisites](#-pre-requisites)
-- [:warning: Flux v2 and Azure ACR](#warning-flux-v2-and-azure-acr)
-- [🪃 You can send your feedback here!](#-you-can-send-your-feedback-here)
+- [GitOps, a slightly realistic situation on Kubernetes with FluxCD](#gitops-a-slightly-realistic-situation-on-kubernetes-with-fluxcd)
+  - [👓 Abstract](#-abstract)
+  - [👓 Synopsis](#-synopsis)
+    - [1st track - dev1](#1st-track---dev1)
+    - [2nd track - dev2](#2nd-track---dev2)
+    - [3rd track - ops](#3rd-track---ops)
+- [👉 Let-su go!](#-let-su-go)
+  - [✋ Pre-requisites](#-pre-requisites)
+- [🚪 Namespace isolation](#-namespace-isolation)
+- [Dev Team](#dev-team)
+- [Ops Team](#ops-team)
+- [Flux](#flux)
+  - [:warning: Flux v2 and Azure ACR](#warning-flux-v2-and-azure-acr)
+- [🔎 References](#-references)
+  - [🪃 You can send your feedback here!](#-you-can-send-your-feedback-here)
 <!-- /TOC -->
 
 Click the button below to start a new development environment:
