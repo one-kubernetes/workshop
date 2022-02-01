@@ -19,7 +19,7 @@ flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=
 ## Clone your repository
 By default, `flux boostrap` don't create the folder inside your shell, so you must clone the newly created repository from Github
 ```bash
-git clone https://github.com/<your-organization>/fleet-infra
+git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}
 ```
 ## Create tenants YAML
 Now we create the base of the directories that will handle the Flux configuration so that it can manage multiple tenants.
@@ -58,6 +58,9 @@ flux create kustomization dev1 --namespace=dev1-ns --service-account=dev1 --sour
 ```
 ```bash
 cd ./tenants/base/dev1/ && kustomize create --autodetect
+```
+```bash
+cd -
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 
@@ -105,42 +108,22 @@ metadata:
   name: dev2-full-access
 rules:
 - apiGroups: ["", "extensions", "apps"]
-  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses", "secrets", "serviceaccounts"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
 EOF
 ```
 ## Create flux resources to watch helm charts releases
 ```bash
 flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --export > ./tenants/base/dev2/sync.yaml
-flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.flux-system --chart=dev2-carapuce-helm --export >> ./tenants/base/dev2/sync.yaml
+flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.flux-system --chart=dev2-carapuce-helm --chart-version="0.1.0" --export >> ./tenants/base/dev2/sync.yaml
 cd ./tenants/base/dev2/ && kustomize create --autodetect
+```
+```bash
+cd -
 ```
 ## Create the patch directory
 ```bash
 mkdir -p ./tenants/staging/dev2
-
-cd ./tenants/staging/dev2/ && kustomize create --autodetect
-
-cat << EOF | tee ./tenants/staging/dev2/dev2-patch.yaml
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: dev2-carapuce
-  namespace: dev2-ns
-spec:
-  chart:
-    spec:
-      version: "0.1.0"
-  test:
-    enable: false
-  values:
-    ingress:
-      hosts:
-        - host: podinfo.staging
-          paths:
-            - path: /
-              pathType: ImplementationSpecific
-EOF
 
 cat << EOF | tee ./tenants/staging/dev2/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -151,6 +134,19 @@ patches:
   - path: dev2-patch.yaml
     target:
       kind: Kustomization
+EOF
+```
+```bash
+cat << EOF | tee ./tenants/staging/dev2/dev2-patch.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: dev2-carapuce
+  namespace: dev2-ns
+spec:
+  chart:
+    spec:
+      version: "0.1.1"
 EOF
 ```
 # Enforce use of Service account for HelmRelease and Kustomization
