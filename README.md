@@ -124,8 +124,11 @@ Now you have all the instructions at hand!
 ## ✋ Pre-requisites
 
 1. To play the _codelab_, you may use an interactive workspace in [GitPod](https://www.gitpod.io) (it's free 💸). Just click the button [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/one-kubernetes/workshop).
-1. To create a `Kubernetes` _cluster_ on **Azure**, [see instructions here](documentation/kubernetes-cluster-on-azure.md).
-1. To create a `Kubernetes` _cluster_ on **Google Cloud GKE**, [see instructions here](documentation/kubernetes-cluster-on-gcloud.md).
+1. This workspace embed a `K3s` server you can use to perform the entire _codelab_.
+
+You also can use `Kubernetes` _clusters_ deployed
+* on **Azure**, [see instructions here](documentation/kubernetes-cluster-on-azure.md).
+* on **Google Cloud GKE**, [see instructions here](documentation/kubernetes-cluster-on-gcloud.md).
 
 # 🚪 Namespace isolation
 
