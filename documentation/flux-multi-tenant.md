@@ -96,6 +96,8 @@ EOF
 ## Create tenant
 ```bash
 mkdir -p ./tenants/base/dev2
+```
+```bash
 flux create tenant dev2 --with-namespace=dev2-ns --cluster-role=dev2-full-access --export > ./tenants/base/dev2/rbac.yaml
 ```
 ```bash
@@ -115,7 +117,11 @@ EOF
 ## Create flux resources to watch helm charts releases
 ```bash
 flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --export > ./tenants/base/dev2/sync.yaml
+```
+```bash
 flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.flux-system --chart=dev2-carapuce-helm --chart-version="0.1.0" --export >> ./tenants/base/dev2/sync.yaml
+```
+```bash
 cd ./tenants/base/dev2/ && kustomize create --autodetect
 ```
 ```bash
@@ -124,7 +130,8 @@ cd -
 ## Create the patch directory
 ```bash
 mkdir -p ./tenants/staging/dev2
-
+```
+```bash
 cat << EOF | tee ./tenants/staging/dev2/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
