@@ -4,5 +4,11 @@ image:
 tasks:
   - init: |
       echo 'TODO: build project'
+      git clone https://github.com/one-kubernetes/dev1-aspicot-app.git
+      git clone https://github.com/one-kubernetes/dev2-carapuce-app.git
+      git clone https://github.com/one-kubernetes/dev2-helm-charts.git
     command: |
       echo 'TODO: start app'
+
+workspaceLocation:
+  "."
