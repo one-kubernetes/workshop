@@ -14,103 +14,49 @@ export GITHUB_TOKEN="<insert your Github personal token here>"
 export GITHUB_USER="one-kubernetes"
 export GITHUB_REPO="fleet-infra"
 
-flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=dev1 --team=dev2 --path=clusters/tourainetech
+flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=dev1 --team=dev2 --path=clusters/snowcamp
 ```
 ## Clone your repository
 By default, `flux boostrap` don't create the folder inside your shell, so you must clone the newly created repository from Github
 ```bash
 git clone https://github.com/<your-organization>/fleet-infra
 ```
-## Apply namespace isolation
-To enforce isolation of namespaces, we will create two different namespaces `dev1-ns` and `dev2-ns`, along with two different service accounts, each account having access to its own namespace.
-```bash
-mkdir -p clusters/tourainetech/namespace-isolation
-cat << EOF | tee ./clusters/tourainetech/namespace-isolation.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: dev1-ns
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: dev1
-  namespace: dev1-ns
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  namespace: dev1-ns
-  name: dev1-full-access
-rules:
-- apiGroups: ["", "extensions", "apps"]
-  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: dev1-view
-  namespace: dev1-ns
-subjects:
-- kind: ServiceAccount
-  name: dev1
-  namespace: dev1-ns
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: dev1-full-access
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: dev2-ns
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: dev2
-  namespace: dev2-ns
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  namespace: dev2-ns
-  name: dev2-full-access
-rules:
-- apiGroups: ["", "extensions", "apps"]
-  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: dev2-view
-  namespace: dev2-ns
-subjects:
-- kind: ServiceAccount
-  name: dev2
-  namespace: dev2-ns
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: dev2-full-access
-```
-> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Create tenants YAML
 Now we create the base of the directories that will handle the Flux configuration so that it can manage multiple tenants.
 ```bash
 cd ./fleet-infra
-flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=3m --export >> clusters/tourainetech/tenants.yaml
+flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=3m --export >> clusters/snowcamp/tenants.yaml
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Onboard dev1 Kustomize
 Now, we can create the first tenant, which will be `dev1`
 ```bash
 mkdir -p ./tenants/base/dev1
-flux create tenant dev1 --with-namespace=dev1-ns --export > ./tenants/base/dev1/rbac.yaml
+```
+```bash
+flux create tenant dev1 --with-namespace=dev1-ns --cluster-role=dev1-full-access --export > ./tenants/base/dev1/rbac.yaml
+```
+```bash
+cat << EOF | tee ./tenants/base/dev1/cluster-role-dev1.yml
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: dev1-ns
+  name: dev1-full-access
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+EOF
+```
+```bash
 flux create source git dev1-aspicot --namespace=dev1-ns --url=https://github.com/one-kubernetes/dev1-aspicot-app/ --branch=main --export > ./tenants/base/dev1/sync.yaml
+```
+```bash
 flux create kustomization dev1 --namespace=dev1-ns --service-account=dev1 --source=GitRepository/dev1-aspicot --path="./" --export >> ./tenants/base/dev1/sync.yaml
+```
+```bash
 cd ./tenants/base/dev1/ && kustomize create --autodetect
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
@@ -129,7 +75,8 @@ metadata:
 spec:
   path: ./
 EOF
-
+```
+```bash
 cat << EOF | tee ./tenants/staging/dev1/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -146,7 +93,21 @@ EOF
 ## Create tenant
 ```bash
 mkdir -p ./tenants/base/dev2
-flux create tenant dev2 --with-namespace=dev2-ns --export > ./tenants/base/dev2/rbac.yaml
+flux create tenant dev2 --with-namespace=dev2-ns --cluster-role=dev2-full-access --export > ./tenants/base/dev2/rbac.yaml
+```
+```bash
+cat << EOF | tee ./tenants/base/dev2/cluster-role-dev2.yml
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: dev2-ns
+  name: dev2-full-access
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
+EOF
 ```
 ## Create flux resources to watch helm charts releases
 ```bash
@@ -195,12 +156,12 @@ EOF
 # Enforce use of Service account for HelmRelease and Kustomization
 ## Download Kyverno distribution
 ```bash
-mkdir -p clusters/tourainetech/kyverno
-wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -P clusters/tourainetech/kyverno
+mkdir -p clusters/snowcamp/kyverno
+wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -P clusters/snowcamp/kyverno
 ```
 ## Install Kyverno on cluster
 ```bash
-cat << EOF | tee ./cluster/tourainetech/kyverno/kustomization.yaml
+cat << EOF | tee ./cluster/snowcamp/kyverno/kustomization.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -212,7 +173,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./cluster/tourainetech/kyverno
+  path: ./cluster/snowcamp/kyverno
   prune: true
   wait: true
   timeout: 5m
@@ -220,8 +181,8 @@ EOF
 ```
 ## Add Kyverno policy to enforce use of Service Account
 ```bash
-mkdir -p cluster/tourainetech/kyverno-policies/
-cat << EOF | tee ./cluster/tourainetech/kyverno-policies/enforce-service-account.yaml
+mkdir -p cluster/snowcamp/kyverno-policies/
+cat << EOF | tee ./cluster/snowcamp/kyverno-policies/enforce-service-account.yaml
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -291,7 +252,7 @@ EOF
 ```
 ## Apply Kyverno policy
 ```bash
-cat << EOF | tee ./cluster/tourainetech/kyverno-policies/kustomization.yaml
+cat << EOF | tee ./cluster/snowcamp/kyverno-policies/kustomization.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -305,13 +266,13 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./cluster/tourainetech/kyverno-policies
+  path: ./cluster/snowcamp/kyverno-policies
   prune: true
 EOF
 ```
 ## Add Kyverno dependency for staging tenant
 ```bash
-cat < EOF | tee ./cluster/tourainetech/tenants.yaml
+cat < EOF | tee ./cluster/snowcamp/tenants.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -329,3 +290,40 @@ spec:
   prune: true
 EOF
 ```
+
+# Install monitoring stack
+## Install kube-prometheus-stack
+```bash
+flux create source git monitoring \
+  --interval=30m \
+  --url=https://github.com/fluxcd/flux2 \
+  --branch=main
+```
+## Apply the manifests
+```bash
+flux create kustomization monitoring-stack \
+  --interval=1h \
+  --prune=true \
+  --source=monitoring \
+  --path="./manifests/monitoring/kube-prometheus-stack" \
+  --health-check="Deployment/kube-prometheus-stack-operator.monitoring" \
+  --health-check="Deployment/kube-prometheus-stack-grafana.monitoring"
+```
+## Install Flux Grafana dashboards
+```bash
+flux create kustomization monitoring-config \
+  --interval=1h \
+  --prune=true \
+  --source=monitoring \
+  --path="./manifests/monitoring/monitoring-config"
+```
+## Access the Grafana dashboard
+```bash
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
+```
+## Get the Grafana admin password
+```bash
+kubectl get secret --namespace kube-prometheus-stack kube-prometheus-stack-grafana -o json | jq '.data | map_values(@base64d)'
+```
+
+# Image updates
