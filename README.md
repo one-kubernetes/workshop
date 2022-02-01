@@ -23,12 +23,17 @@ We will see how these teams collaborate with each other on a daily basis in a _G
 
 ## 👓 Synopsis
 
-This is a hands-on workshop, performed on `Ms Azure` and documented into this very same `Github` repository.    
-Every command is performed from a Docker container that is our work environement so nothing is required but:
+This is a _hands-on_ workshop, documented into this very same `Github` repository.  
+We have 3 different people, **dev1**, **ops** and **dev2**.
+Both devs build very simple Web apps that display Pokemon ID card. One Pokemon per app.  
+Once the Web apps are developped, built and packaged, devs want to deploy them onto a `Kubernetes` _cluster_.  
+The thing is… how to **smartly** deploy without relying on **ops**?
+
+A first historical version of the workshop is performed on `Ms Azure` and every command is performed from a `Docker` container that is our work environment so nothing is required but:
 
 - a browser
-- a docker runtime (Docker-Desktop)
-- and an `Azure` account able to provision resources on `Azure`.
+- and a `Google Cloud` account able to provision resources on `GKE`.
+- or an `Azure` account able to provision resources on `Azure` (especially `AKS`).
 
 First, we detail how to set-up this working environment within a `Docker` image.
 How to build it and run it interactively.  
@@ -36,65 +41,43 @@ How to build it and run it interactively.
 Second, we provision a `Kubernetes` _cluster_ in `AKS`.  
 Then, we have a scenario on 3 tracks:
 
-Here is a sequence diagram of what we will do:
+### 1st track - dev1
 
-![sequence diagram](documentation/mermaid-diagram-20210618090905.svg)
+A **1st track** is a dev named **dev1** that builds a simple _Web application_ and **deploys it into his/her own `Kubernetes` _namespace_ with a simple `Kubernetes` `YAML` file**.  
+The whole thing is to build the _CI/CD_ automation to perform these several steps…
 
-```mermaid
-sequenceDiagram
-    participant d1 as Dev1
-    participant d2 as Dev2
-    participant git as Github
-    participant azd as Azure DevOps
-    participant acr as ACR (container registry)
-    participant acrh as ACR (helm charts repository)
-    participant k8sd1 as k8s namespace Dev 1
-    participant k8sd2 as k8s namespace Dev 2
-    participant fcrd as Flux CRDs
-    participant fope as Flux operator
-    participant o1 as Ops 1
+![dev1](documentation/images/one-kubernetes_Sacha.png)
 
-    d1->>git: push App1_v1 @main
-    Activate azd
-    azd-->>git: trigger CI-pipeline
-    azd->>acr: push Docker image of App_v1
-    azd->>acrh: push Helm Chart of App_v1
-    Deactivate azd
-    o1-)fcrd: Define Source Helm Charts Repository for App_v1
-    Activate fcrd
-    fope-->>fcrd: Get reconciliation config.    
-    fope--)acrh: source Helm repo to detect any new version of Helm Chart
-    fope->>k8sd1: upgrade Helm Release to deploy new version of Helm Chart
-    Deactivate fcrd
+1. I developp a 1st _WebApp_ named [dev1-aspicot-app](https://github.com/one-kubernetes/dev1-aspicot-app)
+1. By using [GitHub Actions](https://github.com/one-kubernetes/dev1-aspicot-app/actions) (👓 [Github Action code](https://github.com/one-kubernetes/dev1-aspicot-app/blob/main/.github/workflows/main.yaml))…
+    * I package it as a `Docker` image (👓 [Dockerfile](https://github.com/one-kubernetes/dev1-aspicot-app/blob/main/Dockerfile))…
+    * … and publish it into a _container registry_ (👓 [Docker Hub](https://hub.docker.com/r/thegaragebandofit/dev1-aspicot/tags))
+1. Then I create the `YAML` file in order to deploy into `Kubernetes` as a _deployment_ and a _service_ (👓 [YAML file](https://github.com/one-kubernetes/dev1-aspicot-app/blob/main/deployment.yaml))
+    * :twisted_rightwards_arrows: I have to ask **ops* in order for me to know which _namespace_ I have to use
+1. :twisted_rightwards_arrows: Finally, I **ask **ops** for help** so that the `Kubernetes` _cluster_ take my deployment into account
 
-    d2->>git: push App2_v1 @main
-    Activate azd
-    azd-->>git: trigger CI-pipeline
-    azd->>acr: push Docker image of App_v1
-    azd->>acrh: push Helm Chart of App_v1
-    Deactivate azd
-    o1-)fcrd: Define Source Helm Charts Repository for App_v2
-    Activate fcrd
-    fope-->>fcrd: Get reconciliation config.    
-    fope--)acrh: source Helm repo to detect any new version of Helm Chart
-    fope->>k8sd2: upgrade Helm Release to deploy new version of Helm Chart
-    Deactivate fcrd
-```
+packaging an `Helm` chart
+1. publishing it into a _chart repository_
+1. deploying it in a `Kubernetes` _namespace_
+1. testing it
+1. _promoting_ it for **Prod** deployment
 
-A **1st track** is a dev that builds a simple application.
+### 2nd track - dev2
 
-The whole thing is to build the _CI/CD_ automation to perform these several steps in term of:
+A **2nd track** is another dev that builds another _Web application_, but this time, he/she **is using a `Helm` _chart_ to deploy it into another dedicated `Kubernetes` _namespace_**.  
 
-- building the app
-- packaging it as a `Docker` image
-- publishing it into a _container registry_
-- packaging an `Helm` chart
-- publishing it into a _chart repository_
-- deploying it in a `Kubernetes` _namespace_
-- testing it
-- _promoting_ it for **Prod** deployment
+![dev2](documentation/images/one-kubernetes_Sigero.png)
 
-A **2nd track** is another dev performing the same steps but with another application and deploying it into another `Kubernetes` _namespace_.  
+1. I developp another _WebApp_ named [dev2-carapuce-app](https://github.com/one-kubernetes/dev2-carapuce-app)
+1. By using [GitHub Actions](https://github.com/one-kubernetes/dev2-carapuce-app/actions) (👓 [Github Action code](https://github.com/one-kubernetes/dev2-carapuce-app/blob/main/.github/workflows/main.yaml))…
+    * I package it as a `Docker` image (👓 [Dockerfile](https://github.com/one-kubernetes/dev2-carapuce-app/blob/main/Dockerfile))…
+    * … and publish it into a _container registry_ (👓 [Docker Hub](https://hub.docker.com/r/thegaragebandofit/dev2-carapuce/tags))
+1. In another [GitHub repository](https://github.com/one-kubernetes/dev2-helm-charts)…
+    * I create the helm chart files (👓 [Helm chart files](https://github.com/one-kubernetes/dev2-helm-charts/tree/main/charts/dev2-carapuce))
+    * I create the [GitHub Pages site](https://one-kubernetes.github.io/dev2-helm-charts/) where my `Helm` _charts_ will be published
+    * I **release and publish** this `Helm` _chart_ as a release thanks to a [GitHub action](https://github.com/one-kubernetes/dev2-helm-charts/actions) (👓 [GitHub Action code](https://github.com/one-kubernetes/dev2-helm-charts/blob/main/.github/workflows/release.yaml))
+
+### 3rd track - ops
 
 A **3rd track** is a _platform ops_ that operates the `Kubernetes` _cluster_.
 
@@ -130,8 +113,9 @@ Now you have all the instructions at hand!
 
 ## ✋ Pre-requisites
 
-1. To play the codelab, you may use an interactive workspace based on a Docker image. [See instructions, here](./codelab-docker-image/README.md).
+1. To play the _codelab_, you may use an interactive workspace in [GitPod](https://www.gitpod.io) (it's free 💸). Just click the button [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/one-kubernetes/workshop).
 1. To create a `Kubernetes` _cluster_ on **Azure**, [see instructions here](documentation/kubernetes-cluster-on-azure.md).
+1. To create a `Kubernetes` _cluster_ on **Google Cloud GKE**, [see instructions here](documentation/kubernetes-cluster-on-gcloud.md).
 
 # 🚪 Namespace isolation
 
