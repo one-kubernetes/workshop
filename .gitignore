@@ -57,3 +57,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# _output/ folder used by K3s install
+_output/
