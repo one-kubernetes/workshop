@@ -9,6 +9,8 @@ tasks:
       git clone https://github.com/one-kubernetes/dev2-helm-charts.git
     command: |
       echo 'TODO: start app'
-
+vscode:
+  extensions:
+    - yzhang.markdown-all-in-one
 workspaceLocation:
   "."
