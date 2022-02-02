@@ -328,7 +328,13 @@ spec:
   prune: true
 EOF
 ```
-
+## Fix Kyverno policy
+```bash
+flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --namespace dev2-ns --export > ./tenants/base/dev2/sync.yaml
+```
+```bash
+flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.dev2-ns --chart=dev2-carapuce-helm --chart-version="0.1.0" --export >> ./tenants/base/dev2/sync.yaml
+```
 # Install monitoring stack
 ## Install Prometheus
 ```bash
