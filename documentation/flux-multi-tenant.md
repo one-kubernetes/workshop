@@ -69,6 +69,8 @@ For this workshop, the `kustomization.yaml` is already created for you.
 
 ```bash
 mkdir -p ./tenants/staging/dev1
+```
+```bash
 cat << EOF | tee ./tenants/staging/dev1/dev1-patch.yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
@@ -114,6 +116,7 @@ rules:
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
 EOF
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Create flux resources to watch helm charts releases
 ```bash
 flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --export > ./tenants/base/dev2/sync.yaml
@@ -127,6 +130,7 @@ cd ./tenants/base/dev2/ && kustomize create --autodetect
 ```bash
 cd -
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Create the patch directory
 ```bash
 mkdir -p ./tenants/staging/dev2
@@ -137,10 +141,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/dev2
+EOF
+```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
+## Patch version of Helm chart
+```bash
+cat << EOF | tee ./tenants/staging/dev2/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/dev2
 patches:
   - path: dev2-patch.yaml
-    target:
-      kind: Kustomization
 EOF
 ```
 ```bash
@@ -153,9 +165,10 @@ metadata:
 spec:
   chart:
     spec:
-      version: "0.1.1"
+      version: 0.1.1
 EOF
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 # Enforce use of Service account for HelmRelease and Kustomization
 ## Download Kyverno distribution
 ```bash
@@ -164,25 +177,10 @@ mkdir -p clusters/snowcamp/kyverno
 ```bash
 wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -O clusters/snowcamp/kyverno/kyverno-components.yaml
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Install Kyverno on cluster
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kyverno/kyverno-sync.yaml
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: kyverno
-  namespace: flux-system
-spec:
-  interval: 10m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./clusters/snowcamp/kyverno
-  prune: true
-  wait: true
-  timeout: 5m
-EOF
+flux create kustomization kyverno --prune true --interval 10m --path ./clusters/snowcamp/kyverno --wait true --source GitRepository/flux-system --export > ./clusters/snowcamp/kyverno/sync.yaml
 ```
 ```bash
 cd ./clusters/snowcamp/kyverno/ && kustomize create --autodetect
@@ -190,6 +188,7 @@ cd ./clusters/snowcamp/kyverno/ && kustomize create --autodetect
 ```bash
 cd -
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Add Kyverno policy to enforce use of Service Account
 ```bash
 mkdir -p clusters/snowcamp/kyverno-policies
@@ -264,23 +263,7 @@ spec:
 EOF
 ```
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kyverno-policies/kyverno-policies-sync.yaml
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: kyverno-policies
-  namespace: flux-system
-spec:
-  interval: 10m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./clusters/snowcamp/kyverno-policies
-  prune: true
-  wait: true
-  timeout: 5m
-EOF
+flux create kustomization kyverno-policies --prune true --interval 10m --path ./clusters/snowcamp/kyverno-policies --wait true --source GitRepository/flux-system --export > ./clusters/snowcamp/kyverno-policies/sync.yaml
 ```
 ```bash
 cd ./clusters/snowcamp/kyverno-policies/ && kustomize create --autodetect
@@ -288,46 +271,17 @@ cd ./clusters/snowcamp/kyverno-policies/ && kustomize create --autodetect
 ```bash
 cd -
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Apply Kyverno policy
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kyverno-policies/kyverno-policies-sync.yaml
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: kyverno-policies
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: kyverno
-  interval: 5m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./clusters/snowcamp/kyverno-policies
-  prune: true
-EOF
+flux create kustomization kyverno-policies --prune true --interval 5m --path ./clusters/snowcamp/kyverno-policies --source GitRepository/flux-system --depends-on kyverno --export > ./clusters/snowcamp/kyverno-policies/sync.yaml
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Add Kyverno dependency for staging tenant
 ```bash
-cat << EOF | tee ./clusters/snowcamp/tenants.yaml
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: tenants
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: kyverno-policies
-  interval: 5m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./tenants/staging
-  prune: true
-EOF
+flux create kustomization tenants --prune true --interval 5m --path ./tenants/staging --source GitRepository/flux-system --depends-on kyverno-policies --export > ./clusters/snowcamp/tenants.yaml
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Fix Kyverno policy
 ```bash
 flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --namespace dev2-ns --export > ./tenants/base/dev2/sync.yaml
@@ -335,6 +289,7 @@ flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-
 ```bash
 flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2 --source=HelmRepository/charts.dev2-ns --chart=dev2-carapuce-helm --chart-version="0.1.0" --export >> ./tenants/base/dev2/sync.yaml
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 # Install monitoring stack
 ## Install Prometheus
 ```bash
@@ -361,6 +316,7 @@ EOF
 ```bash
 flux create helmrelease kube-prometheus-stack --chart kube-prometheus-stack --source HelmRepository/prometheus-community --chart-version 31.0.0 --crds CreateReplace --export --target-namespace monitoring --create-target-namespace true --values ./clusters/snowcamp/kube-prometheus-stack/values.yaml >> ./clusters/snowcamp/kube-prometheus-stack/sync.yaml
 ```
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Install Flux Grafana dashboards
 ```bash
 mkdir -p clusters/snowcamp/kube-prometheus-stack-config
@@ -416,7 +372,7 @@ configMapGenerator:
         grafana_dashboard: flux-system
 EOF
 ```
-
+> :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Access the Grafana dashboard
 ```bash
 kubectl -n monitoring port-forward svc/monitoring-kube-prometheus-stack-grafana 3000:80
