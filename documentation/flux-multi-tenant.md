@@ -37,7 +37,7 @@ mkdir -p ./tenants/base/dev1
 flux create tenant dev1 --with-namespace=dev1-ns --cluster-role=dev1-full-access --export > ./tenants/base/dev1/rbac.yaml
 ```
 ```bash
-cat << EOF | tee ./tenants/base/dev1/cluster-role-dev1.yml
+cat << EOF | tee ./tenants/base/dev1/cluster-role-dev1.yaml
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -101,7 +101,7 @@ mkdir -p ./tenants/base/dev2
 flux create tenant dev2 --with-namespace=dev2-ns --cluster-role=dev2-full-access --export > ./tenants/base/dev2/rbac.yaml
 ```
 ```bash
-cat << EOF | tee ./tenants/base/dev2/cluster-role-dev2.yml
+cat << EOF | tee ./tenants/base/dev2/cluster-role-dev2.yaml
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -160,11 +160,13 @@ EOF
 ## Download Kyverno distribution
 ```bash
 mkdir -p clusters/snowcamp/kyverno
-wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -P clusters/snowcamp/kyverno
+```
+```bash
+wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -O clusters/snowcamp/kyverno/kyverno-components.yaml
 ```
 ## Install Kyverno on cluster
 ```bash
-cat << EOF | tee ./cluster/snowcamp/kyverno/kustomization.yaml
+cat << EOF | tee ./clusters/snowcamp/kyverno/kyverno-sync.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -176,16 +178,24 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./cluster/snowcamp/kyverno
+  path: ./clusters/snowcamp/kyverno
   prune: true
   wait: true
   timeout: 5m
 EOF
 ```
+```bash
+cd ./clusters/snowcamp/kyverno/ && kustomize create --autodetect
+```
+```bash
+cd -
+```
 ## Add Kyverno policy to enforce use of Service Account
 ```bash
-mkdir -p cluster/snowcamp/kyverno-policies/
-cat << EOF | tee ./cluster/snowcamp/kyverno-policies/enforce-service-account.yaml
+mkdir -p clusters/snowcamp/kyverno-policies
+```
+```bash
+cat << EOF | tee ./clusters/snowcamp/kyverno-policies/enforce-service-account.yaml
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -253,9 +263,34 @@ spec:
               value:  "{{request.object.metadata.namespace}}"
 EOF
 ```
+```bash
+cat << EOF | tee ./clusters/snowcamp/kyverno-policies/kyverno-policies-sync.yaml
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kyverno-policies
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./clusters/snowcamp/kyverno-policies
+  prune: true
+  wait: true
+  timeout: 5m
+EOF
+```
+```bash
+cd ./clusters/snowcamp/kyverno-policies/ && kustomize create --autodetect
+```
+```bash
+cd -
+```
 ## Apply Kyverno policy
 ```bash
-cat << EOF | tee ./cluster/snowcamp/kyverno-policies/kustomization.yaml
+cat << EOF | tee ./clusters/snowcamp/kyverno-policies/kyverno-policies-sync.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -269,13 +304,13 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./cluster/snowcamp/kyverno-policies
+  path: ./clusters/snowcamp/kyverno-policies
   prune: true
 EOF
 ```
 ## Add Kyverno dependency for staging tenant
 ```bash
-cat < EOF | tee ./cluster/snowcamp/tenants.yaml
+cat << EOF | tee ./clusters/snowcamp/tenants.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -295,35 +330,92 @@ EOF
 ```
 
 # Install monitoring stack
-## Install kube-prometheus-stack
+## Install Prometheus
 ```bash
-flux create source git monitoring \
-  --interval=30m \
-  --url=https://github.com/fluxcd/flux2 \
-  --branch=main
+mkdir -p clusters/snowcamp/kube-prometheus-stack
 ```
-## Apply the manifests
 ```bash
-flux create kustomization monitoring-stack \
-  --interval=1h \
-  --prune=true \
-  --source=monitoring \
-  --path="./manifests/monitoring/kube-prometheus-stack" \
-  --health-check="Deployment/kube-prometheus-stack-operator.monitoring" \
-  --health-check="Deployment/kube-prometheus-stack-grafana.monitoring"
+flux create source helm prometheus-community --url=https://prometheus-community.github.io/helm-charts --interval=1m --export > clusters/snowcamp/kube-prometheus-stack/sync.yaml
+```
+```bash
+cat << EOF | tee ./clusters/snowcamp/kube-prometheus-stack/values.yaml
+alertmanager:
+  enabled: false
+grafana:
+  sidecar:
+    dashboards:
+      searchNamespace: ALL
+prometheus:
+  prometheusSpec:
+    podMonitorSelector:
+      matchLabels:
+        app.kubernetes.io/part-of: flux
+EOF
+```
+```bash
+flux create helmrelease kube-prometheus-stack --chart kube-prometheus-stack --source HelmRepository/prometheus-community --chart-version 31.0.0 --crds CreateReplace --export --target-namespace monitoring --create-target-namespace true --values ./clusters/snowcamp/kube-prometheus-stack/values.yaml >> ./clusters/snowcamp/kube-prometheus-stack/sync.yaml
 ```
 ## Install Flux Grafana dashboards
 ```bash
-flux create kustomization monitoring-config \
-  --interval=1h \
-  --prune=true \
-  --source=monitoring \
-  --path="./manifests/monitoring/monitoring-config"
+mkdir -p clusters/snowcamp/kube-prometheus-stack-config
 ```
+```bash
+cat << EOF | tee ./clusters/snowcamp/kube-prometheus-stack-config/podmonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flux-system
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/part-of: flux
+spec:
+  namespaceSelector:
+    matchNames:
+      - flux-system
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - helm-controller
+          - source-controller
+          - kustomize-controller
+          - notification-controller
+          - image-automation-controller
+          - image-reflector-controller
+  podMetricsEndpoints:
+    - port: http-prom
+EOF
+```
+```bash
+wget https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/cluster.json -P ./clusters/snowcamp/kube-prometheus-stack-config/
+```
+```bash
+wget https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/control-plane.json -P ./clusters/snowcamp/kube-prometheus-stack-config/
+```
+```bash
+cat << EOF | tee ./clusters/snowcamp/kube-prometheus-stack-config/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: flux-system
+resources:
+  - podmonitor.yaml
+configMapGenerator:
+  - name: flux-grafana-dashboards
+    files:
+      - control-plane.json
+      - cluster.json
+    options:
+      labels:
+        grafana_dashboard: flux-system
+EOF
+```
+
 ## Access the Grafana dashboard
 ```bash
-kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
+kubectl -n monitoring port-forward svc/monitoring-kube-prometheus-stack-grafana 3000:80
 ```
+
 ## Get the Grafana admin password
 ```bash
 kubectl get secret --namespace kube-prometheus-stack kube-prometheus-stack-grafana -o json | jq '.data | map_values(@base64d)'
