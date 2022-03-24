@@ -4,7 +4,7 @@
 
 ## Création du _tenant_ dédié à **dev1**
 
-```bash [1|2-5|6-17|18-22|23-27|28-29]
+```bash
 $ mkdir -p ./tenants/base/dev1
 $ flux create tenant dev1            \
     --with-namespace=dev1-ns         \
@@ -59,7 +59,7 @@ subjects:
 
 ## Isolation du _namespace_ dédié à **dev1**
 
-```bash [1|2-5|6-17|18-22|23-27|28-29]
+```bash
 $ cat << EOF | tee ./tenants/base/dev1/cluster-role-dev1.yaml
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -78,7 +78,7 @@ EOF
 
 ## Création de la source `Github` dédié à **dev1**
 
-```bash [1|2-5|6-17|18-22|23-27|28-29]
+```bash [1-5|6-10|11-13]
 $ flux create source git dev1-aspicot
     --namespace=dev1-ns
     --url=https://github.com/one-kubernetes/dev1-aspicot-app/
@@ -91,7 +91,7 @@ $ flux create kustomization dev1
     --path="./" --export >> ./tenants/base/dev1/sync.yaml
 $ cd ./tenants/base/dev1/
 $  kustomize create --autodetect
-cd -
+$ cd -
 ```
 
 ----
