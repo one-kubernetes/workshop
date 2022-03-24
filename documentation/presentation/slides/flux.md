@@ -43,5 +43,3 @@
 
 * À partir de là, toute la configuration du _cluster_ Kubernetes peut se faire exclusivement en manipulant des dépôts `git`.
 * On est dans le respect du _pattern_ roi dans `Kubernetes` : **la convergence vers un état cible décrit**
-
-----
