@@ -2,7 +2,7 @@
 
 ----
 
-## Création du _tenant_ dédié à dev1
+## Création du _tenant_ dédié à **dev1**
 
 ```bash [1|2-5|6-17|18-22|23-27|28-29]
 $ mkdir -p ./tenants/base/dev1
@@ -10,6 +10,56 @@ $ flux create tenant dev1            \
     --with-namespace=dev1-ns         \
     --cluster-role=dev1-full-access  \
     --export > ./tenants/base/dev1/rbac.yaml
+```
+
+----
+
+### 📄 ./tenants/base/dev1/rbac.yaml
+
+```yaml [1-7|9-16|18-36]
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    toolkit.fluxcd.io/tenant: dev1
+  name: dev1-ns
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    toolkit.fluxcd.io/tenant: dev1
+  name: dev1
+  namespace: dev1-ns
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    toolkit.fluxcd.io/tenant: dev1
+  name: dev1-reconciler
+  namespace: dev1-ns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dev1-full-access
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: gotk:dev1-ns:reconciler
+- kind: ServiceAccount
+  name: dev1
+  namespace: dev1-ns
+```
+
+----
+
+## Isolation du _namespace_ dédié à **dev1**
+
+```bash [1|2-5|6-17|18-22|23-27|28-29]
 $ cat << EOF | tee ./tenants/base/dev1/cluster-role-dev1.yaml
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -22,6 +72,13 @@ rules:
   resources: ["deployments", "replicasets", "pods", "services", "ingresses"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"] # You can also use ["*"]
 EOF
+```
+
+----
+
+## Création de la source `Github` dédié à **dev1**
+
+```bash [1|2-5|6-17|18-22|23-27|28-29]
 $ flux create source git dev1-aspicot
     --namespace=dev1-ns
     --url=https://github.com/one-kubernetes/dev1-aspicot-app/
@@ -35,6 +92,53 @@ $ flux create kustomization dev1
 $ cd ./tenants/base/dev1/
 $  kustomize create --autodetect
 cd -
+```
+
+----
+
+### 📄 ./tenants/base/dev1/sync.yaml
+
+```yaml [1-11|13-26]
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: dev1-aspicot
+  namespace: dev1-ns
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  url: https://github.com/one-kubernetes/dev1-aspicot-app/
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: dev1
+  namespace: dev1-ns
+spec:
+  interval: 1m0s
+  path: ./
+  prune: false
+  serviceAccountName: dev1
+  sourceRef:
+    kind: GitRepository
+    name: dev1-aspicot
+```
+
+----
+
+### 📄 ./tenants/base/dev1/kustomization.yaml
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- cluster-role-dev1.yaml
+- rbac.yaml
+- sync.yaml
+
 ```
 
 ----
