@@ -21,6 +21,9 @@
 
 ```bash
 $ flux check ---pre
+► checking prerequisites
+✔ Kubernetes 1.21.9-gke.1002 >=1.20.6-0
+✔ prerequisites checks passed
 ```
 
 ----
@@ -62,6 +65,41 @@ $ flux bootstrap github         \
     --team=dev1                 \
     --team=dev2                 \
     --path=clusters/cloudsud
+
+► connecting to github.com
+✔ repository "https://github.com/one-kubernetes/fleet-infra" created
+► reconciling repository permissions
+✔ granted "maintain" permissions to "dev1"
+✔ granted "maintain" permissions to "dev2"
+✔ reconciled repository permissions
+► cloning branch "main" from Git repository "https://github.com/one-kubernetes/fleet-infra.git"
+✔ cloned repository
+► generating component manifests
+✔ generated component manifests
+✔ committed sync manifests to "main" ("b4906bb66eca7296ba28f0c83808d6de143f930f")
+► pushing component manifests to "https://github.com/one-kubernetes/fleet-infra.git"
+✔ installed components
+✔ reconciled components
+► determining if source secret "flux-system/flux-system" exists
+► generating source secret
+✔ public key: ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBPWKYVtQ6aCxQMMGRt+HqYD/JRC4sSQtdacQNMs+qhoppVH2+kNMnWIEl8LpJO1szfM2/d+gu3O1bg4T+WkEHgmepO1AYDpO8zmR3uMgeRg7IPeZY3E2BgVaKvfdRuDs6g==
+✔ configured deploy key "flux-system-main-flux-system-./clusters/cloudsud" for "https://github.com/one-kubernetes/fleet-infra"
+► applying source secret "flux-system/flux-system"
+✔ reconciled source secret
+► generating sync manifests
+✔ generated sync manifests
+✔ committed sync manifests to "main" ("d076136fc7ffaac5f215ec706f56aac5af3de42c")
+► pushing sync manifests to "https://github.com/one-kubernetes/fleet-infra.git"
+► applying sync manifests
+✔ reconciled sync configuration
+◎ waiting for Kustomization "flux-system/flux-system" to be reconciled
+✔ Kustomization reconciled successfully
+► confirming components are healthy
+✔ helm-controller: deployment ready
+✔ kustomize-controller: deployment ready
+✔ notification-controller: deployment ready
+✔ source-controller: deployment ready
+✔ all components are healthy
 ```
 
 ----
@@ -95,7 +133,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./clusters/snowcamp
+  path: ./clusters/cloudsud
   prune: true
   sourceRef:
     kind: GitRepository
