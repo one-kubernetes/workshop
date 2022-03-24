@@ -61,7 +61,7 @@ $ flux bootstrap github         \
     --repository=${GITHUB_REPO} \
     --team=dev1                 \
     --team=dev2                 \
-    --path=clusters/snowcamp    \
+    --path=clusters/cloudsud
 ```
 
 ----
@@ -94,7 +94,7 @@ $ flux create kustomization tenants    \
     --path ./tenants/staging           \
     --prune                            \
     --interval=3m                      \
-    --export >> clusters/snowcamp/tenants.yaml
+    --export >> clusters/cloudsud/tenants.yaml
 ```
 
 > ⚠️ N'oubliez pas de `git commit` et `git push` vers Github : c'est la source qui va être scrutée par `Flux`.

@@ -36,6 +36,7 @@ $ cd ./tenants/base/dev1/
 $  kustomize create --autodetect
 cd -
 ```
+
 ----
 
 ### Synchro avec le dépôt Github
