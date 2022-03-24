@@ -103,7 +103,7 @@ L'équipe **dev2** va vouloir faire des mises à jour sur son application.
 
 ## Où déployer ?
 
-* L'équipe *ops* dispose d'un _cluster_ `Kubernetes` sur lequel les applications _Pokemon_ seront déployées.
+* L'équipe **ops** dispose d'un _cluster_ `Kubernetes` sur lequel les applications _Pokemon_ seront déployées.
   * une partie de son _cluster_ à des fins de **test** : `staging`
   * Plus tard, une autre partie du _cluster_ sera dédiée à la **prod** : `prod`
 * Pour chacune des équipes **dev1** et **dev2**, on met à disposition un _namespace_ dédié et **isolé** du reste du _cluster_.
