@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>GitOps - Une mise en situation un peu réaliste sur Kubernetes avec Flux</title>
+
+    <link rel="stylesheet" href="revealjs/dist/reset.css">
+    <link rel="stylesheet" href="revealjs/dist/reveal.css" id="theme">
+    <link rel="stylesheet" href="revealjs/dist/theme/white.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="revealjs/plugin/highlight/monokai.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'revealjs/css/print/pdf.css' : 'revealjs/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown="slides/introduction.md"
+          data-separator="^\r?\n---\r?\n$"
+          data-separator-vertical="^\r?\n----\r?\n$"
+          data-separator-notes="^Note:"
+          data-charset="utf-8"
+          data-background-image="../images/Montpellier.jpg"
+          data-background-opacity=".3"
+        >
+        </section>
+        <section data-markdown="slides/scenario.md"
+          data-separator="^\r?\n---\r?\n$"
+          data-separator-vertical="^\r?\n----\r?\n$"
+          data-separator-notes="^Note:"
+          data-charset="utf-8"
+          data-background-image="../images/pixybay-polygon-906202_1280.jpg"
+          data-background-opacity=".3"
+        >
+        </section>
+        <section data-markdown="slides/flux.md"
+          data-separator="^\r?\n---\r?\n$"
+          data-separator-vertical="^\r?\n----\r?\n$"
+          data-separator-notes="^Note:"
+          data-charset="utf-8"
+          data-background-image="../images/pixabay-background-gbfe105386_1280.png"
+          data-background-opacity=".3"
+        >
+        </section>
+        <section data-markdown="slides/installation.md"
+          data-separator="^\r?\n---\r?\n$"
+          data-separator-vertical="^\r?\n----\r?\n$"
+          data-separator-notes="^Note:"
+          data-charset="utf-8"
+          data-background-image="../images/pixybay-polygon-906202_1280.jpg"
+          data-background-opacity=".3"
+        >
+        </section>
+      </section>
+      <section data-markdown="slides/dev1_config.md"
+        data-separator="^\r?\n---\r?\n$"
+        data-separator-vertical="^\r?\n----\r?\n$"
+        data-separator-notes="^Note:"
+        data-charset="utf-8"
+        data-background-image="../images/pixybay-polygon-906202_1280.jpg"
+        data-background-opacity=".3"
+      >
+      </section>
+      <section data-markdown="slides/fin.md"
+        data-separator="^\r?\n---\r?\n$"
+        data-separator-vertical="^\r?\n----\r?\n$"
+        data-separator-notes="^Note:"
+        data-charset="utf-8"
+        data-background-image="../images/pixabay-background-gbfe105386_1280.png"
+        data-background-opacity=".3"
+      >
+      </section>
+    </div>
+    </div>
+
+    <script src="revealjs/dist/reveal.js"></script>
+    <script src="revealjs/plugin/markdown/markdown.js"></script>
+    <script src="revealjs/plugin/highlight/highlight.js"></script>
+    <script src="revealjs/plugin/notes/notes.js"></script>
+
+    <script>
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: false,
+            center: true,
+            history: false,
+            keyboard: true,
+            disableLayout: false,
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+        });
+    </script>
+</body>
+</html>
