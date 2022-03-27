@@ -4,7 +4,7 @@
 
 ## 2 équipes de dev
 
-<img class="r-stretch" src="../images/one-kubernetes_Sacha.png">
+<img class="r-stretch" src="images/one-kubernetes_Sacha.png">
 
 * 2 équipes *dev1* et *dev2* conçoivent chacune une application _Pokemon_.
 * un _Pokemon_ par application.
@@ -13,13 +13,13 @@
 
 #### dev1
 
-<img class="r-stretch" src="../images/dev1_website001.png">
+<img class="r-stretch" src="images/dev1_website001.png">
 
 ----
 
 #### dev2
 
-<img class="r-stretch" src="../images/dev2_website001.png">
+<img class="r-stretch" src="images/dev2_website001.png">
 
 ----
 
@@ -34,7 +34,7 @@
 
 https://github.com/one-kubernetes/dev1-aspicot-app
 
-<img class="r-stretch" src="../images/dev1_files.png">
+<img class="r-stretch" src="images/dev1_files.png">
 
 ----
 
@@ -42,7 +42,7 @@ https://github.com/one-kubernetes/dev1-aspicot-app
 
 https://github.com/one-kubernetes/dev2-carapuce-app
 
-<img class="r-stretch" src="../images/dev2_files.png">
+<img class="r-stretch" src="images/dev2_files.png">
 
 ----
 
@@ -89,15 +89,15 @@ L'équipe **dev2** va vouloir faire des mises à jour sur son application.
 
 ----
 
-<img class="r-stretch" src="../images/dev2_website001.png">
+<img class="r-stretch" src="images/dev2_website001.png">
 
 ----
 
-<img class="r-stretch" src="../images/dev2_website002.png">
+<img class="r-stretch" src="images/dev2_website002.png">
 
 ----
 
-<img class="r-stretch" src="../images/dev2_website003.png">
+<img class="r-stretch" src="images/dev2_website003.png">
 
 ---
 
@@ -112,7 +112,7 @@ L'équipe **dev2** va vouloir faire des mises à jour sur son application.
 
 ### Comment déployer ?
 
-<img class="r-stretch" src="../images/one-kubernetes_Sacha.png">
+<img class="r-stretch" src="images/one-kubernetes_Sacha.png">
 
 * La cible de déploiement est un _namespace_ dédié sur le _cluster_ `Kubernetes` de l'entreprise.
 * L'équipe **dev1** produit le fichier `YAML` qui va construire les ressources `Kubernetes` nécessaires au déploiement de son application.

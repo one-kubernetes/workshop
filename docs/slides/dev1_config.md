@@ -147,13 +147,13 @@ resources:
 
 Après git commit && git push, on obtient cette arborescence.
 
-<img class="r-stretch" src="../images/dev1_config_files.jpg">
+<img class="r-stretch" src="images/dev1_config_files.jpg">
 
 ----
 
 ### Création de la kustomization dans le dépôt de dev
 
-<img class="r-stretch" src="../images/one-kubernetes_Sacha.png">
+<img class="r-stretch" src="images/one-kubernetes_Sacha.png">
 
 * `Flux` scrute le dépôt de **dev1**, mais il s'attend à y trouver un fichier `kustomization.yaml`
 * dev1 doit donc y créer ce fichier
@@ -166,7 +166,7 @@ $ kustomize create --autodetect
 
 ### Ajout d'un patch spécifique à dev1 en staging
 
-<img class="r-stretch" src="../images/one-kubernetes_Sigero.png">
+<img class="r-stretch" src="images/one-kubernetes_Sigero.png">
 
 ```bash [1|2-10|11-20]
 $ mkdir -p ./tenants/staging/dev1
@@ -195,7 +195,7 @@ EOF
 
 ### dev1-aspicot est déployé
 
-<img class="r-stretch" src="../images/dev1_website001.png">
+<img class="r-stretch" src="images/dev1_website001.png">
 
 ----
 

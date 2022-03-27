@@ -21,7 +21,7 @@
 
 ----
 
-<img class="r-stretch" src="../images/flux_schema.png">
+<img class="r-stretch" src="images/flux_schema.png">
 
 ----
 

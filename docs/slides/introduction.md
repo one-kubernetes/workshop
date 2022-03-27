@@ -19,14 +19,14 @@ On va voir comment ces équipes **collaborent** entre elles au quotidien dans un
 
 Solution architect @ Google  
 [@laurentgrangeau](https://twitter.com/laurentgrangeau/) on Twitter  
-<img class="r-stretch" src="../images/laurentgrangeau.jpg">
+<img class="r-stretch" src="images/laurentgrangeau.jpg">
 
 ----
 
 ## Ludovic Piot
 DevOps & Cloud architect Freelance  
 [@lpiot](https://twitter.com/lpiot/) on Twitter  
-<img class="r-stretch" src="../images/lpiot.jpg">
+<img class="r-stretch" src="images/lpiot.jpg">
 
 ----
 

@@ -2,7 +2,7 @@
 
 ----
 
-<img class="r-stretch" src="../images/one-kubernetes_Sigero.png">
+<img class="r-stretch" src="images/one-kubernetes_Sigero.png">
 
 ## La CLI
 
@@ -35,14 +35,14 @@ $ flux check ---pre
 
 ----
 
-<img class="r-stretch" src="../images/github_add_token.png">
+<img class="r-stretch" src="images/github_add_token.png">
 
 ----
 
 * `Flux` peut aussi indiquer les équipes qui auront le droit de modifier cette configuration.
 * Il faut que ces équipes fassent déjà partie de l'organisation.
 
-<img class="r-stretch" src="../images/github_teams.jpg">
+<img class="r-stretch" src="images/github_teams.jpg">
 
 
 ----
@@ -104,7 +104,7 @@ $ flux bootstrap github         \
 
 ----
 
-<img class="r-stretch" src="../images/flux_config_files.jpg">
+<img class="r-stretch" src="images/flux_config_files.jpg">
 
 ----
 
@@ -164,7 +164,7 @@ $ git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}
 
 ## Création d'une config. `staging` et `prod`
 
-<img class="r-stretch" src="../images/one-kubernetes_Sigero.png">
+<img class="r-stretch" src="images/one-kubernetes_Sigero.png">
 
 * **ops** va scinder son _cluster_ en 2 : `staging` et `prod`
 * Grace à _Kustomize_, elle va
