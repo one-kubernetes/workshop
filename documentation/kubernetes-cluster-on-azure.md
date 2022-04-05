@@ -20,7 +20,7 @@ Follow the instructions.
 ```bash
 export location='eastus'
 export rg='k8s-lab'
-export aks='k8s-staging'
+export aks='myk8scluster'
 export acr='k8sLabRegistry'
 
 # Create a resource group $rg on a specific location $location (for example eastus) which will contain the Azure services we need 

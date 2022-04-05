@@ -16,7 +16,7 @@ export GITHUB_TOKEN="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"
 export GITHUB_USER="one-kubernetes"
 export GITHUB_REPO="flat"
 
-flux bootstrap github --context=k8s-staging --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --personal --branch=main --path=clusters/staging
+flux bootstrap github --context=myk8scluster --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --personal --branch=main --path=clusters/mycluster
 ```
 
 By doing so, `Flux`:
