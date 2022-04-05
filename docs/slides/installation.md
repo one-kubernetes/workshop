@@ -64,7 +64,7 @@ $ flux bootstrap github         \
     --repository=${GITHUB_REPO} \
     --team=dev1                 \
     --team=dev2                 \
-    --path=clusters/cloudsud
+    --path=clusters/mycluster
 
 ► connecting to github.com
 ✔ repository "https://github.com/one-kubernetes/fleet-infra" created
@@ -83,7 +83,7 @@ $ flux bootstrap github         \
 ► determining if source secret "flux-system/flux-system" exists
 ► generating source secret
 ✔ public key: ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBPWKYVtQ6aCxQMMGRt+HqYD/JRC4sSQtdacQNMs+qhoppVH2+kNMnWIEl8LpJO1szfM2/d+gu3O1bg4T+WkEHgmepO1AYDpO8zmR3uMgeRg7IPeZY3E2BgVaKvfdRuDs6g==
-✔ configured deploy key "flux-system-main-flux-system-./clusters/cloudsud" for "https://github.com/one-kubernetes/fleet-infra"
+✔ configured deploy key "flux-system-main-flux-system-./clusters/mycluster" for "https://github.com/one-kubernetes/fleet-infra"
 ► applying source secret "flux-system/flux-system"
 ✔ reconciled source secret
 ► generating sync manifests
@@ -133,7 +133,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./clusters/cloudsud
+  path: ./clusters/mycluster
   prune: true
   sourceRef:
     kind: GitRepository
@@ -182,7 +182,7 @@ $ flux create kustomization tenants    \
     --path ./tenants/staging           \
     --prune                            \
     --interval=3m                      \
-    --export >> clusters/cloudsud/tenants.yaml
+    --export >> clusters/mycluster/tenants.yaml
 ```
 
 ----

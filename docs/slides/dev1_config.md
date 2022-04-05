@@ -193,6 +193,12 @@ EOF
 
 ----
 
+### la chaine de configuration
+
+<img class="r-stretch" src="images/flux_config_dependencies.jpg">
+
+----
+
 ### dev1-aspicot est déployé
 
 <img class="r-stretch" src="images/dev1_website001.png">

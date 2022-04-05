@@ -14,7 +14,7 @@ export GITHUB_TOKEN="<insert your Github personal token here>"
 export GITHUB_USER="one-kubernetes"
 export GITHUB_REPO="fleet-infra"
 
-flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=dev1 --team=dev2 --path=clusters/snowcamp
+flux bootstrap github --owner=${GITHUB_USER} --repository=${GITHUB_REPO} --team=dev1 --team=dev2 --path=clusters/mycluster
 ```
 ## Clone your repository
 By default, `flux boostrap` don't create the folder inside your shell, so you must clone the newly created repository from Github
@@ -25,7 +25,7 @@ git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}
 Now we create the base of the directories that will handle the Flux configuration so that it can manage multiple tenants.
 ```bash
 cd ./fleet-infra
-flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=3m --export >> clusters/snowcamp/tenants.yaml
+flux create kustomization tenants --namespace=flux-system --source=GitRepository/flux-system --path ./tenants/staging --prune --interval=3m --export >> clusters/mycluster/tenants.yaml
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Onboard dev1 Kustomize
@@ -172,18 +172,18 @@ EOF
 # Enforce use of Service account for HelmRelease and Kustomization
 ## Download Kyverno distribution
 ```bash
-mkdir -p clusters/snowcamp/kyverno
+mkdir -p clusters/mycluster/kyverno
 ```
 ```bash
-wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -O clusters/snowcamp/kyverno/kyverno-components.yaml
+wget https://raw.githubusercontent.com/kyverno/kyverno/v1.5.4/definitions/release/install.yaml -O clusters/mycluster/kyverno/kyverno-components.yaml
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Install Kyverno on cluster
 ```bash
-flux create kustomization kyverno --prune true --interval 10m --path ./clusters/snowcamp/kyverno --wait true --source GitRepository/flux-system --export > ./clusters/snowcamp/kyverno/sync.yaml
+flux create kustomization kyverno --prune true --interval 10m --path ./clusters/mycluster/kyverno --wait true --source GitRepository/flux-system --export > ./clusters/mycluster/kyverno/sync.yaml
 ```
 ```bash
-cd ./clusters/snowcamp/kyverno/ && kustomize create --autodetect
+cd ./clusters/mycluster/kyverno/ && kustomize create --autodetect
 ```
 ```bash
 cd -
@@ -191,10 +191,10 @@ cd -
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Add Kyverno policy to enforce use of Service Account
 ```bash
-mkdir -p clusters/snowcamp/kyverno-policies
+mkdir -p clusters/mycluster/kyverno-policies
 ```
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kyverno-policies/enforce-service-account.yaml
+cat << EOF | tee ./clusters/mycluster/kyverno-policies/enforce-service-account.yaml
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -263,10 +263,10 @@ spec:
 EOF
 ```
 ```bash
-flux create kustomization kyverno-policies --prune true --interval 10m --path ./clusters/snowcamp/kyverno-policies --wait true --source GitRepository/flux-system --export > ./clusters/snowcamp/kyverno-policies/sync.yaml
+flux create kustomization kyverno-policies --prune true --interval 10m --path ./clusters/mycluster/kyverno-policies --wait true --source GitRepository/flux-system --export > ./clusters/mycluster/kyverno-policies/sync.yaml
 ```
 ```bash
-cd ./clusters/snowcamp/kyverno-policies/ && kustomize create --autodetect
+cd ./clusters/mycluster/kyverno-policies/ && kustomize create --autodetect
 ```
 ```bash
 cd -
@@ -274,12 +274,12 @@ cd -
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Apply Kyverno policy
 ```bash
-flux create kustomization kyverno-policies --prune true --interval 5m --path ./clusters/snowcamp/kyverno-policies --source GitRepository/flux-system --depends-on kyverno --export > ./clusters/snowcamp/kyverno-policies/sync.yaml
+flux create kustomization kyverno-policies --prune true --interval 5m --path ./clusters/mycluster/kyverno-policies --source GitRepository/flux-system --depends-on kyverno --export > ./clusters/mycluster/kyverno-policies/sync.yaml
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Add Kyverno dependency for staging tenant
 ```bash
-flux create kustomization tenants --prune true --interval 5m --path ./tenants/staging --source GitRepository/flux-system --depends-on kyverno-policies --export > ./clusters/snowcamp/tenants.yaml
+flux create kustomization tenants --prune true --interval 5m --path ./tenants/staging --source GitRepository/flux-system --depends-on kyverno-policies --export > ./clusters/mycluster/tenants.yaml
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Fix Kyverno policy
@@ -293,13 +293,13 @@ flux create helmrelease dev2-carapuce --namespace=dev2-ns --service-account=dev2
 # Install monitoring stack
 ## Install Prometheus
 ```bash
-mkdir -p clusters/snowcamp/kube-prometheus-stack
+mkdir -p clusters/mycluster/kube-prometheus-stack
 ```
 ```bash
-flux create source helm prometheus-community --url=https://prometheus-community.github.io/helm-charts --interval=1m --export > clusters/snowcamp/kube-prometheus-stack/sync.yaml
+flux create source helm prometheus-community --url=https://prometheus-community.github.io/helm-charts --interval=1m --export > clusters/mycluster/kube-prometheus-stack/sync.yaml
 ```
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kube-prometheus-stack/values.yaml
+cat << EOF | tee ./clusters/mycluster/kube-prometheus-stack/values.yaml
 alertmanager:
   enabled: false
 grafana:
@@ -314,15 +314,15 @@ prometheus:
 EOF
 ```
 ```bash
-flux create helmrelease kube-prometheus-stack --chart kube-prometheus-stack --source HelmRepository/prometheus-community --chart-version 31.0.0 --crds CreateReplace --export --target-namespace monitoring --create-target-namespace true --values ./clusters/snowcamp/kube-prometheus-stack/values.yaml >> ./clusters/snowcamp/kube-prometheus-stack/sync.yaml
+flux create helmrelease kube-prometheus-stack --chart kube-prometheus-stack --source HelmRepository/prometheus-community --chart-version 31.0.0 --crds CreateReplace --export --target-namespace monitoring --create-target-namespace true --values ./clusters/mycluster/kube-prometheus-stack/values.yaml >> ./clusters/mycluster/kube-prometheus-stack/sync.yaml
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
 ## Install Flux Grafana dashboards
 ```bash
-mkdir -p clusters/snowcamp/kube-prometheus-stack-config
+mkdir -p clusters/mycluster/kube-prometheus-stack-config
 ```
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kube-prometheus-stack-config/podmonitor.yaml
+cat << EOF | tee ./clusters/mycluster/kube-prometheus-stack-config/podmonitor.yaml
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -350,13 +350,13 @@ spec:
 EOF
 ```
 ```bash
-wget https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/cluster.json -P ./clusters/snowcamp/kube-prometheus-stack-config/
+wget https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/cluster.json -P ./clusters/mycluster/kube-prometheus-stack-config/
 ```
 ```bash
-wget https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/control-plane.json -P ./clusters/snowcamp/kube-prometheus-stack-config/
+wget https://raw.githubusercontent.com/fluxcd/flux2/main/manifests/monitoring/grafana/dashboards/control-plane.json -P ./clusters/mycluster/kube-prometheus-stack-config/
 ```
 ```bash
-cat << EOF | tee ./clusters/snowcamp/kube-prometheus-stack-config/kustomization.yaml
+cat << EOF | tee ./clusters/mycluster/kube-prometheus-stack-config/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: flux-system

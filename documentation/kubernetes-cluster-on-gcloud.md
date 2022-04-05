@@ -18,17 +18,17 @@ Follow the instructions.
 
 #TODO: instructions needed here
 ```bash
-gcloud projects create snowcamp2022-gitops-flux
+gcloud projects create gitops-training-flux
 ```
 
 ## 👉 Provision a Kubernetes cluster
 
 ```bash
 export region='europe-west1-b'
-export name='k8s-staging'
+export name='myk8scluster'
 
 # Setup of the GKE cluster
-gcloud container clusters create --region='europe-west1-b' 'k8s-staging'
+gcloud container clusters create --region='europe-west1-b' 'myk8scluster'
 
 # Once created (the creation could take ~5 min), get the kube configuration to interact with your GKE cluster
 kubectl get nodes
