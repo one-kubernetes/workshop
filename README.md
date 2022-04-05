@@ -232,4 +232,5 @@ This workshop is inspired by the following Internet resources:
 
 ## 🪃 You can send your feedback here!
 
-[![roti.express SnowCamp 2022](documentation/images/SnowCamp2022_ROTIExpress_QRcode.png "roti.express SnowCamp 2022")](https://roti.express/r/sc22-031)
+* [![SnowCamp 2022](documentation/images/SnowCamp2022_ROTIExpress_QRcode.png "roti.express SnowCamp 2022")](https://roti.express/r/sc22-031)
+* [France DevOps 5 avril 2022](https://roti.express/r/gitops-20220405)

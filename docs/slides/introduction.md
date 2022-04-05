@@ -36,3 +36,10 @@ DevOps & Cloud architect Freelance
 1. le dépôt principal :<br>https://github.com/one-kubernetes/workshop
 1. le présent [_slidedeck_](https://github.com/one-kubernetes/workshop/blob/main/slidedecks/slidedeck-fr.html) en 🇫🇷
 2. les [instructions du _workshop_](https://github.com/one-kubernetes/workshop/blob/main/documentation/flux-multi-tenant.md)
+
+----
+
+# Envoyez vos feedbacks
+
+https://roti.express/r/gitops-20220405
+<img class="r-stretch" src="https://roti.express/img/roti-magnet.png">
