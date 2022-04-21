@@ -76,7 +76,7 @@ EOF
 
 ----
 
-## Création de la source `Github` dédié à **dev1**
+## Création de la source `Github` dédiée à **dev1**
 
 ```bash [1-5|6-10|11-13]
 $ flux create source git dev1-aspicot
