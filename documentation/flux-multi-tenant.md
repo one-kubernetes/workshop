@@ -94,8 +94,10 @@ patches:
 EOF
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
+
 # Onboard dev2 team
 ## Create tenant
+
 ```bash
 mkdir -p ./tenants/base/dev2
 ```
@@ -117,6 +119,7 @@ rules:
 EOF
 ```
 > :warning: Remember to commit and push your code each time you make a change so that FluxCD can apply the changes.
+
 ## Create flux resources to watch helm charts releases
 ```bash
 flux create source helm charts --url=https://one-kubernetes.github.io/dev2-helm-charts --interval=3m --export > ./tenants/base/dev2/sync.yaml
