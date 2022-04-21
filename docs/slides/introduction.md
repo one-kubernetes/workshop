@@ -41,5 +41,5 @@ DevOps & Cloud architect Freelance
 
 # Envoyez vos feedbacks
 
-https://roti.express/r/gitops-20220405
-<img class="r-stretch" src="https://roti.express/img/roti-magnet.png">
+Laissez vos retours sur l'application mobile de **Devoxx**
+<img class="r-stretch" src="images/devoxx_app_logo.png">
