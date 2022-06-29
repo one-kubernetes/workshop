@@ -36,10 +36,3 @@ DevOps & Cloud architect Freelance
 1. le dépôt principal :<br>https://github.com/one-kubernetes/workshop
 1. le présent [_slidedeck_](https://github.com/one-kubernetes/workshop/blob/main/slidedecks/slidedeck-fr.html) en 🇫🇷
 2. les [instructions du _workshop_](https://github.com/one-kubernetes/workshop/blob/main/documentation/flux-multi-tenant.md)
-
-----
-
-# Envoyez vos feedbacks
-
-Laissez vos retours sur l'application mobile de **Devoxx**
-<img class="r-stretch" src="images/devoxx_app_logo.png">
