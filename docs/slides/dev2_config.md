@@ -73,6 +73,6 @@ spec:
 
 ### Synchro avec le dépôt Github
 
-Après git commit && git push, on obtient cette arborescence.
+Après `git commit && git push`, on obtient cette arborescence.
 
-<img class="r-stretch" src="images/dev2_config_files.jpg">
+<img class="r-stretch" src="images/dev2_config_files.png">
