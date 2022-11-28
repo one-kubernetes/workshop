@@ -79,18 +79,18 @@ EOF
 ## Création de la source `Github` dédiée à **dev1**
 
 ```bash [1-5|6-10|11-13]
-$ flux create source git dev1-aspicot
-    --namespace=dev1-ns
-    --url=https://github.com/one-kubernetes/dev1-aspicot-app/
-    --branch=main
+$ flux create source git dev1-aspicot                         \
+    --namespace=dev1-ns                                       \
+    --url=https://github.com/one-kubernetes/dev1-aspicot-app/ \
+    --branch=main                                             \
     --export > ./tenants/base/dev1/sync.yaml
-$ flux create kustomization dev1
-    --namespace=dev1-ns
-    --service-account=dev1
-    --source=GitRepository/dev1-aspicot
+$ flux create kustomization dev1        \
+    --namespace=dev1-ns                 \
+    --service-account=dev1              \
+    --source=GitRepository/dev1-aspicot \
     --path="./" --export >> ./tenants/base/dev1/sync.yaml
 $ cd ./tenants/base/dev1/
-$  kustomize create --autodetect
+$ kustomize create --autodetect
 $ cd -
 ```
 

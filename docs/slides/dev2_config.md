@@ -12,24 +12,24 @@ Créer le tenant dédié à **dev2** se fait de la même manière que pour **dev
 
 ----
 
-## Création de la source `Helm` dédiée à **dev2**
+### Création de la source `Helm` dédiée à **dev2**
 
 ⚠️ Là par contre, les choses changent !
 
 On ne se source plus depuis un dépôt `git` mais depuis un dépôt de _charts_ `Helm`
 
 ```bash [1-4|6-12][14]
-$ flux create source helm charts
-    --url=https://one-kubernetes.github.io/dev2-helm-charts
-    --interval=3m
+$ flux create source helm charts                            \
+    --url=https://one-kubernetes.github.io/dev2-helm-charts \
+    --interval=3m                                           \
     --export > ./tenants/base/dev2/sync.yaml
 
-$ flux create helmrelease dev2-carapuce
-    --namespace=dev2-ns
-    --service-account=dev2
-    --source=HelmRepository/charts.flux-system
-    --chart=dev2-carapuce-helm
-    --chart-version="0.1.0"
+$ flux create helmrelease dev2-carapuce        \
+    --namespace=dev2-ns                        \
+    --service-account=dev2                     \
+    --source=HelmRepository/charts.flux-system \
+    --chart=dev2-carapuce-helm                 \
+    --chart-version="0.1.0"                    \
     --export >> ./tenants/base/dev2/sync.yaml
 
 $ cd ./tenants/base/dev2/ && kustomize create --autodetect
