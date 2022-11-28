@@ -29,7 +29,7 @@ $ flux create source helm charts                            \
 
 ## Création de la source `Helm` dédiée à **dev2**
 
-```bash [1-7][9]
+```bash [1-7|9]
 $ flux create helmrelease dev2-carapuce        \
     --namespace=dev2-ns                        \
     --service-account=dev2                     \
